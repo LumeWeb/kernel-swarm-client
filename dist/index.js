@@ -3,7 +3,7 @@ import { callModule as callModuleModule, connectModule as connectModuleModule, }
 import { EventEmitter } from "events";
 const DHT_MODULE = "AQD1IgE4lTZkq1fqdoYGojKRNrSk0YQ_wrHbRtIiHDrnow";
 let callModule, connectModule;
-if (window.document) {
+if (typeof window !== "undefined" && window?.document) {
     callModule = callModuleKernel;
     connectModule = connectModuleKernel;
 }
