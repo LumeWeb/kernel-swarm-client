@@ -7,6 +7,8 @@ export declare class DHT {
     connect(pubkey: string): Promise<Socket>;
     ready(): Promise<ErrTuple>;
     addRelay(pubkey: string): Promise<void>;
+    removeRelay(pubkey: string): Promise<void>;
+    clearRelays(): Promise<void>;
 }
 export declare class Socket extends EventEmitter {
     private id;

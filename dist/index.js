@@ -28,6 +28,15 @@ export class DHT {
             throw new Error(err);
         }
     }
+    async removeRelay(pubkey) {
+        const [, err] = await callModule(DHT_MODULE, "removeRelay", { pubkey });
+        if (err) {
+            throw new Error(err);
+        }
+    }
+    async clearRelays() {
+        await callModule(DHT_MODULE, "clearRelays");
+    }
 }
 export class Socket extends EventEmitter {
     id;
