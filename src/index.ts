@@ -27,7 +27,7 @@ export class DHT {
   public async connect(pubkey: string): Promise<Socket> {
     const [resp, err] = await callModule(DHT_MODULE, "connect", { pubkey });
     if (err) {
-      throw err;
+      throw new Error(err);
     }
     return new Socket(resp.id);
   }
@@ -39,7 +39,7 @@ export class DHT {
   public async addRelay(pubkey: string): Promise<void> {
     const [, err] = await callModule(DHT_MODULE, "addRelay", { pubkey });
     if (err) {
-      throw err;
+      throw new Error(err);
     }
   }
 }
