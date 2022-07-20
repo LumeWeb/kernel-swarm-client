@@ -6,6 +6,7 @@ import { Buffer } from "buffer";
 export declare class DHT {
     connect(pubkey: string): Promise<Socket>;
     ready(): Promise<ErrTuple>;
+    addRelay(pubkey: string): Promise<void>;
 }
 export declare class Socket extends EventEmitter {
     private id;

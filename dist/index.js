@@ -15,12 +15,18 @@ export class DHT {
     async connect(pubkey) {
         const [resp, err] = await callModule(DHT_MODULE, "connect", { pubkey });
         if (err) {
-            throw err;
+            throw new Error(err);
         }
         return new Socket(resp.id);
     }
     async ready() {
         return callModule(DHT_MODULE, "ready");
+    }
+    async addRelay(pubkey) {
+        const [, err] = await callModule(DHT_MODULE, "addRelay", { pubkey });
+        if (err) {
+            throw new Error(err);
+        }
     }
 }
 export class Socket extends EventEmitter {
