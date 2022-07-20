@@ -15,12 +15,12 @@ const DHT_MODULE = "AQD1IgE4lTZkq1fqdoYGojKRNrSk0YQ_wrHbRtIiHDrnow";
 let callModule: typeof callModuleModule,
   connectModule: typeof connectModuleModule;
 
-if (window.document) {
-  callModule = callModuleKernel;
-  connectModule = connectModuleKernel;
+if (typeof window !== "undefined" && window?.document) {
+    callModule = callModuleKernel;
+    connectModule = connectModuleKernel;
 } else {
-  callModule = callModuleModule;
-  connectModule = connectModuleModule;
+    callModule = callModuleModule;
+    connectModule = connectModuleModule;
 }
 
 export class DHT {
