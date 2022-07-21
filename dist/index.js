@@ -1,18 +1,24 @@
-import { callModule as callModuleKernel, connectModule as connectModuleKernel, } from "libkernel";
-import { callModule as callModuleModule, connectModule as connectModuleModule, } from "libkmodule";
 import { EventEmitter } from "events";
 const DHT_MODULE = "AQD1IgE4lTZkq1fqdoYGojKRNrSk0YQ_wrHbRtIiHDrnow";
 let callModule, connectModule;
-if (typeof window !== "undefined" && window?.document) {
-    callModule = callModuleKernel;
-    connectModule = connectModuleKernel;
-}
-else {
-    callModule = callModuleModule;
-    connectModule = connectModuleModule;
+async function loadLibs() {
+    if (callModule && connectModule) {
+        return;
+    }
+    if (typeof window !== "undefined" && window?.document) {
+        const pkg = (await import("libkernel"));
+        callModule = pkg.callModule;
+        connectModule = pkg.connectModule;
+    }
+    else {
+        const pkg = (await import("libkmodule"));
+        callModule = pkg.callModule;
+        connectModule = pkg.connectModule;
+    }
 }
 export class DHT {
     async connect(pubkey) {
+        await loadLibs();
         const [resp, err] = await callModule(DHT_MODULE, "connect", { pubkey });
         if (err) {
             throw new Error(err);
@@ -20,21 +26,25 @@ export class DHT {
         return new Socket(resp.id);
     }
     async ready() {
+        await loadLibs();
         return callModule(DHT_MODULE, "ready");
     }
     async addRelay(pubkey) {
+        await loadLibs();
         const [, err] = await callModule(DHT_MODULE, "addRelay", { pubkey });
         if (err) {
             throw new Error(err);
         }
     }
     async removeRelay(pubkey) {
+        await loadLibs();
         const [, err] = await callModule(DHT_MODULE, "removeRelay", { pubkey });
         if (err) {
             throw new Error(err);
         }
     }
     async clearRelays() {
+        await loadLibs();
         await callModule(DHT_MODULE, "clearRelays");
     }
 }
