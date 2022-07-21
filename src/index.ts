@@ -1,30 +1,30 @@
-import {
-    callModule as callModuleKernel,
-    connectModule as connectModuleKernel,
-} from "libkernel";
-import {
-    callModule as callModuleModule,
-    connectModule as connectModuleModule,
-} from "libkmodule";
 import {EventEmitter} from "events";
 import {DataFn, ErrTuple} from "libskynet";
 import {Buffer} from "buffer";
 
 const DHT_MODULE = "AQD1IgE4lTZkq1fqdoYGojKRNrSk0YQ_wrHbRtIiHDrnow";
 
-let callModule: typeof callModuleModule,
-    connectModule: typeof connectModuleModule;
+let callModule: any,
+    connectModule: any;
 
-if (typeof window !== "undefined" && window?.document) {
-    callModule = callModuleKernel;
-    connectModule = connectModuleKernel;
-} else {
-    callModule = callModuleModule;
-    connectModule = connectModuleModule;
+async function loadLibs() {
+    if (callModule && connectModule) {
+        return;
+    }
+    if (typeof window !== "undefined" && window?.document) {
+        const pkg = (await import("libkernel"));
+        callModule = pkg.callModule;
+        connectModule = pkg.connectModule;
+    } else {
+        const pkg = (await import("libkmodule"));
+        callModule = pkg.callModule;
+        connectModule = pkg.connectModule;
+    }
 }
 
 export class DHT {
     public async connect(pubkey: string): Promise<Socket> {
+        await loadLibs();
         const [resp, err] = await callModule(DHT_MODULE, "connect", {pubkey});
         if (err) {
             throw new Error(err);
@@ -33,10 +33,12 @@ export class DHT {
     }
 
     async ready(): Promise<ErrTuple> {
+        await loadLibs();
         return callModule(DHT_MODULE, "ready");
     }
 
     public async addRelay(pubkey: string): Promise<void> {
+        await loadLibs();
         const [, err] = await callModule(DHT_MODULE, "addRelay", {pubkey});
         if (err) {
             throw new Error(err);
@@ -44,6 +46,7 @@ export class DHT {
     }
 
     public async removeRelay(pubkey: string): Promise<void> {
+        await loadLibs();
         const [, err] = await callModule(DHT_MODULE, "removeRelay", {pubkey});
         if (err) {
             throw new Error(err);
@@ -51,6 +54,7 @@ export class DHT {
     }
 
     public async clearRelays(): Promise<void> {
+        await loadLibs();
         await callModule(DHT_MODULE, "clearRelays");
     }
 }
