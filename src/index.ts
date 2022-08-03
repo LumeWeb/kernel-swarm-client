@@ -23,7 +23,7 @@ async function loadLibs() {
 
 export class DHT {
   private useDefaultDht: boolean;
-  private id: number;
+  private id: number = 0;
 
   constructor(useDefaultDht = true) {
     this.useDefaultDht = useDefaultDht;
