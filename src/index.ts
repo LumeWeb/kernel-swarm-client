@@ -23,6 +23,13 @@ async function loadLibs() {
 }
 
 export class DHT {
+    private useDefaultDht: boolean;
+    private id: number;
+
+    constructor(useDefaultDht = true) {
+        this.useDefaultDht = useDefaultDht;
+    }
+
     public async connect(pubkey: string): Promise<Socket> {
         await loadLibs();
         const [resp, err] = await callModule(DHT_MODULE, "connect", {pubkey});
@@ -34,12 +41,14 @@ export class DHT {
 
     async ready(): Promise<ErrTuple> {
         await loadLibs();
-        return callModule(DHT_MODULE, "ready");
+        const dht = !this.useDefaultDht ? this.id : undefined;
+        return callModule(DHT_MODULE, "ready", {dht});
     }
 
     public async addRelay(pubkey: string): Promise<void> {
         await loadLibs();
-        const [, err] = await callModule(DHT_MODULE, "addRelay", {pubkey});
+        const dht = !this.useDefaultDht ? this.id : undefined;
+        const [, err] = await callModule(DHT_MODULE, "addRelay", {pubkey, dht});
         if (err) {
             throw new Error(err);
         }
@@ -47,7 +56,8 @@ export class DHT {
 
     public async removeRelay(pubkey: string): Promise<void> {
         await loadLibs();
-        const [, err] = await callModule(DHT_MODULE, "removeRelay", {pubkey});
+        const dht = !this.useDefaultDht ? this.id : undefined;
+        const [, err] = await callModule(DHT_MODULE, "removeRelay", {pubkey, dht});
         if (err) {
             throw new Error(err);
         }
@@ -55,7 +65,35 @@ export class DHT {
 
     public async clearRelays(): Promise<void> {
         await loadLibs();
-        await callModule(DHT_MODULE, "clearRelays");
+        const dht = !this.useDefaultDht ? this.id : undefined;
+        await callModule(DHT_MODULE, "clearRelays", {dht});
+    }
+
+    private async create() {
+        await loadLibs();
+        if (this.useDefaultDht) {
+            return Promise.resolve();
+        }
+        const [dht, err] = await callModule(DHT_MODULE, "openDht");
+        if (err) {
+            throw new Error(err);
+        }
+
+        this.id = dht;
+    }
+
+    public async close(): Promise<boolean> {
+        await loadLibs();
+
+        if (this.useDefaultDht) {
+            return false;
+        }
+        const [, err] = await callModule(DHT_MODULE, "closeDht", {dht: this.id});
+        if (err) {
+            throw new Error(err);
+        }
+
+        return true;
     }
 }
 

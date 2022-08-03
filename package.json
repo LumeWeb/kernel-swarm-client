@@ -5,6 +5,7 @@
     "main": "dist/index.js",
     "dependencies": {
         "buffer": "^6.0.3",
+        "events": "^3.3.0",
         "libkernel": "^0.1.43",
         "libkmodule": "^0.2.44",
         "libskynet": "^0.0.62"
