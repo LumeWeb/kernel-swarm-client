@@ -6,17 +6,22 @@ async function loadLibs() {
         return;
     }
     if (typeof window !== "undefined" && window?.document) {
-        const pkg = (await import("libkernel"));
+        const pkg = await import("libkernel");
         callModule = pkg.callModule;
         connectModule = pkg.connectModule;
     }
     else {
-        const pkg = (await import("libkmodule"));
+        const pkg = await import("libkmodule");
         callModule = pkg.callModule;
         connectModule = pkg.connectModule;
     }
 }
 export class DHT {
+    useDefaultDht;
+    id;
+    constructor(useDefaultDht = true) {
+        this.useDefaultDht = useDefaultDht;
+    }
     async connect(pubkey) {
         await loadLibs();
         const [resp, err] = await callModule(DHT_MODULE, "connect", { pubkey });
@@ -27,25 +32,54 @@ export class DHT {
     }
     async ready() {
         await loadLibs();
-        return callModule(DHT_MODULE, "ready");
+        const dht = !this.useDefaultDht ? this.id : undefined;
+        return callModule(DHT_MODULE, "ready", { dht });
     }
     async addRelay(pubkey) {
         await loadLibs();
-        const [, err] = await callModule(DHT_MODULE, "addRelay", { pubkey });
+        const dht = !this.useDefaultDht ? this.id : undefined;
+        const [, err] = await callModule(DHT_MODULE, "addRelay", { pubkey, dht });
         if (err) {
             throw new Error(err);
         }
     }
     async removeRelay(pubkey) {
         await loadLibs();
-        const [, err] = await callModule(DHT_MODULE, "removeRelay", { pubkey });
+        const dht = !this.useDefaultDht ? this.id : undefined;
+        const [, err] = await callModule(DHT_MODULE, "removeRelay", {
+            pubkey,
+            dht,
+        });
         if (err) {
             throw new Error(err);
         }
     }
     async clearRelays() {
         await loadLibs();
-        await callModule(DHT_MODULE, "clearRelays");
+        const dht = !this.useDefaultDht ? this.id : undefined;
+        await callModule(DHT_MODULE, "clearRelays", { dht });
+    }
+    async create() {
+        await loadLibs();
+        if (this.useDefaultDht) {
+            return Promise.resolve();
+        }
+        const [dht, err] = await callModule(DHT_MODULE, "openDht");
+        if (err) {
+            throw new Error(err);
+        }
+        this.id = dht;
+    }
+    async close() {
+        await loadLibs();
+        if (this.useDefaultDht) {
+            return false;
+        }
+        const [, err] = await callModule(DHT_MODULE, "closeDht", { dht: this.id });
+        if (err) {
+            throw new Error(err);
+        }
+        return true;
     }
 }
 export class Socket extends EventEmitter {

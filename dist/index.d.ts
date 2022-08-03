@@ -4,11 +4,16 @@ import { EventEmitter } from "events";
 import { ErrTuple } from "libskynet";
 import { Buffer } from "buffer";
 export declare class DHT {
+    private useDefaultDht;
+    private id;
+    constructor(useDefaultDht?: boolean);
     connect(pubkey: string): Promise<Socket>;
     ready(): Promise<ErrTuple>;
     addRelay(pubkey: string): Promise<void>;
     removeRelay(pubkey: string): Promise<void>;
     clearRelays(): Promise<void>;
+    private create;
+    close(): Promise<boolean>;
 }
 export declare class Socket extends EventEmitter {
     private id;
