@@ -1,5 +1,4 @@
 import { EventEmitter } from "events";
-import { create } from "domain";
 const DHT_MODULE = "AQD1IgE4lTZkq1fqdoYGojKRNrSk0YQ_wrHbRtIiHDrnow";
 let callModule, connectModule;
 async function loadLibs() {
@@ -22,10 +21,9 @@ export class DHT {
     id = 0;
     constructor(useDefaultDht = true) {
         this.useDefaultDht = useDefaultDht;
-        return create();
     }
     async connect(pubkey) {
-        await loadLibs();
+        await this.setup();
         const [resp, err] = await callModule(DHT_MODULE, "connect", { pubkey });
         if (err) {
             throw new Error(err);
@@ -33,12 +31,12 @@ export class DHT {
         return new Socket(resp.id);
     }
     async ready() {
-        await loadLibs();
+        await this.setup();
         const dht = !this.useDefaultDht ? this.id : undefined;
         return callModule(DHT_MODULE, "ready", { dht });
     }
     async addRelay(pubkey) {
-        await loadLibs();
+        await this.setup();
         const dht = !this.useDefaultDht ? this.id : undefined;
         const [, err] = await callModule(DHT_MODULE, "addRelay", { pubkey, dht });
         if (err) {
@@ -46,7 +44,7 @@ export class DHT {
         }
     }
     async removeRelay(pubkey) {
-        await loadLibs();
+        await this.setup();
         const dht = !this.useDefaultDht ? this.id : undefined;
         const [, err] = await callModule(DHT_MODULE, "removeRelay", {
             pubkey,
@@ -57,13 +55,13 @@ export class DHT {
         }
     }
     async clearRelays() {
-        await loadLibs();
+        await this.setup();
         const dht = !this.useDefaultDht ? this.id : undefined;
         await callModule(DHT_MODULE, "clearRelays", { dht });
     }
     async create() {
         await loadLibs();
-        if (this.useDefaultDht) {
+        if (this.useDefaultDht || this.id > 0) {
             return Promise.resolve();
         }
         const [dht, err] = await callModule(DHT_MODULE, "openDht");
@@ -73,7 +71,7 @@ export class DHT {
         this.id = dht;
     }
     async close() {
-        await loadLibs();
+        await this.setup();
         if (this.useDefaultDht) {
             return false;
         }
@@ -82,6 +80,10 @@ export class DHT {
             throw new Error(err);
         }
         return true;
+    }
+    async setup() {
+        await loadLibs();
+        await this.create();
     }
 }
 export class Socket extends EventEmitter {

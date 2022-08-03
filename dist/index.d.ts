@@ -14,6 +14,7 @@ export declare class DHT {
     clearRelays(): Promise<void>;
     private create;
     close(): Promise<boolean>;
+    private setup;
 }
 export declare class Socket extends EventEmitter {
     private id;
