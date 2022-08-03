@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { create } from "domain";
 const DHT_MODULE = "AQD1IgE4lTZkq1fqdoYGojKRNrSk0YQ_wrHbRtIiHDrnow";
 let callModule, connectModule;
 async function loadLibs() {
@@ -18,9 +19,10 @@ async function loadLibs() {
 }
 export class DHT {
     useDefaultDht;
-    id;
+    id = 0;
     constructor(useDefaultDht = true) {
         this.useDefaultDht = useDefaultDht;
+        return create();
     }
     async connect(pubkey) {
         await loadLibs();

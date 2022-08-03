@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import { DataFn, ErrTuple } from "libskynet";
 import { Buffer } from "buffer";
+import {create} from "domain";
 
 const DHT_MODULE = "AQD1IgE4lTZkq1fqdoYGojKRNrSk0YQ_wrHbRtIiHDrnow";
 
@@ -30,7 +31,7 @@ export class DHT {
   }
 
   public async connect(pubkey: string): Promise<Socket> {
-    await loadLibs();
+    await this.setup();
     const [resp, err] = await callModule(DHT_MODULE, "connect", { pubkey });
     if (err) {
       throw new Error(err);
@@ -39,13 +40,13 @@ export class DHT {
   }
 
   async ready(): Promise<ErrTuple> {
-    await loadLibs();
+    await this.setup();
     const dht = !this.useDefaultDht ? this.id : undefined;
     return callModule(DHT_MODULE, "ready", { dht });
   }
 
   public async addRelay(pubkey: string): Promise<void> {
-    await loadLibs();
+    await this.setup();
     const dht = !this.useDefaultDht ? this.id : undefined;
     const [, err] = await callModule(DHT_MODULE, "addRelay", { pubkey, dht });
     if (err) {
@@ -54,7 +55,7 @@ export class DHT {
   }
 
   public async removeRelay(pubkey: string): Promise<void> {
-    await loadLibs();
+    await this.setup();
     const dht = !this.useDefaultDht ? this.id : undefined;
     const [, err] = await callModule(DHT_MODULE, "removeRelay", {
       pubkey,
@@ -66,14 +67,14 @@ export class DHT {
   }
 
   public async clearRelays(): Promise<void> {
-    await loadLibs();
+    await this.setup();
     const dht = !this.useDefaultDht ? this.id : undefined;
     await callModule(DHT_MODULE, "clearRelays", { dht });
   }
 
   private async create() {
     await loadLibs();
-    if (this.useDefaultDht) {
+    if (this.useDefaultDht || this.id > 0) {
       return Promise.resolve();
     }
     const [dht, err] = await callModule(DHT_MODULE, "openDht");
@@ -85,7 +86,7 @@ export class DHT {
   }
 
   public async close(): Promise<boolean> {
-    await loadLibs();
+    await this.setup();
 
     if (this.useDefaultDht) {
       return false;
@@ -96,6 +97,11 @@ export class DHT {
     }
 
     return true;
+  }
+
+  private async setup(){
+      await loadLibs();
+      await this.create();
   }
 }
 
