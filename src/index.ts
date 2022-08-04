@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import { DataFn, ErrTuple } from "libskynet";
 import { Buffer } from "buffer";
-import {create} from "domain";
+import { create } from "domain";
 
 const DHT_MODULE = "AQD1IgE4lTZkq1fqdoYGojKRNrSk0YQ_wrHbRtIiHDrnow";
 
@@ -32,7 +32,11 @@ export class DHT {
 
   public async connect(pubkey: string): Promise<Socket> {
     await this.setup();
-    const [resp, err] = await callModule(DHT_MODULE, "connect", { pubkey });
+    const dht = !this.useDefaultDht ? this.id : undefined;
+    const [resp, err] = await callModule(DHT_MODULE, "connect", {
+      pubkey,
+      dht,
+    });
     if (err) {
       throw new Error(err);
     }
@@ -99,9 +103,9 @@ export class DHT {
     return true;
   }
 
-  private async setup(){
-      await loadLibs();
-      await this.create();
+  private async setup() {
+    await loadLibs();
+    await this.create();
   }
 }
 
