@@ -119,7 +119,11 @@ export class Socket extends EventEmitter {
         callModule(DHT_MODULE, "write", { id: this.id, message });
     }
     end() {
-        callModule(DHT_MODULE, "close", { id: this.id });
+        callModule(DHT_MODULE, "socketExists", { id: this.id }).then(([exists]) => {
+            if (exists) {
+                callModule(DHT_MODULE, "close", { id: this.id });
+            }
+        });
     }
     ensureEvent(event) {
         if (!(event in this.eventUpdates)) {
