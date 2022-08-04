@@ -24,7 +24,11 @@ export class DHT {
     }
     async connect(pubkey) {
         await this.setup();
-        const [resp, err] = await callModule(DHT_MODULE, "connect", { pubkey });
+        const dht = !this.useDefaultDht ? this.id : undefined;
+        const [resp, err] = await callModule(DHT_MODULE, "connect", {
+            pubkey,
+            dht,
+        });
         if (err) {
             throw new Error(err);
         }
