@@ -68,7 +68,7 @@ export class DHT {
         if (err) {
             throw new Error(err);
         }
-        this.id = dht;
+        this.id = dht.dht;
     }
     async close() {
         await this.setup();
