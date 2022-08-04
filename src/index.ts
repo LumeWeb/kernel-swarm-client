@@ -82,7 +82,7 @@ export class DHT {
       throw new Error(err);
     }
 
-    this.id = dht;
+    this.id = dht.dht;
   }
 
   public async close(): Promise<boolean> {
