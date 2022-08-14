@@ -63,6 +63,22 @@ export class DHT {
         const dht = !this.useDefaultDht ? this.id : undefined;
         await callModule(DHT_MODULE, "clearRelays", { dht });
     }
+    async getRelays() {
+        await this.setup();
+        const [list, err] = await callModule(DHT_MODULE, "getRelays");
+        if (err) {
+            throw new Error(err);
+        }
+        return list;
+    }
+    async getRelayServers() {
+        await this.setup();
+        const [list, err] = await callModule(DHT_MODULE, "getRelayServers");
+        if (err) {
+            throw new Error(err);
+        }
+        return list;
+    }
     async create() {
         await loadLibs();
         if (this.useDefaultDht || this.id > 0) {

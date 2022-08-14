@@ -12,6 +12,8 @@ export declare class DHT {
     addRelay(pubkey: string): Promise<void>;
     removeRelay(pubkey: string): Promise<void>;
     clearRelays(): Promise<void>;
+    getRelays(): Promise<string[]>;
+    getRelayServers(): Promise<string[]>;
     private create;
     close(): Promise<boolean>;
     private setup;
