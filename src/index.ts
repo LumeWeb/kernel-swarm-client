@@ -75,6 +75,24 @@ export class DHT {
     const dht = !this.useDefaultDht ? this.id : undefined;
     await callModule(DHT_MODULE, "clearRelays", { dht });
   }
+  public async getRelays(): Promise<string[]> {
+    await this.setup();
+    const [list, err] = await callModule(DHT_MODULE, "getRelays");
+    if (err) {
+      throw new Error(err);
+    }
+
+    return list;
+  }
+  public async getRelayServers(): Promise<string[]> {
+    await this.setup();
+    const [list, err] = await callModule(DHT_MODULE, "getRelayServers");
+    if (err) {
+      throw new Error(err);
+    }
+
+    return list;
+  }
 
   private async create() {
     await loadLibs();
@@ -150,11 +168,13 @@ export class Socket extends EventEmitter {
   }
 
   end(): void {
-    callModule(DHT_MODULE, "socketExists", { id: this.id }).then(([exists]: ErrTuple) => {
-      if (exists) {
-        callModule(DHT_MODULE, "close", { id: this.id });
+    callModule(DHT_MODULE, "socketExists", { id: this.id }).then(
+      ([exists]: ErrTuple) => {
+        if (exists) {
+          callModule(DHT_MODULE, "close", { id: this.id });
+        }
       }
-    });
+    );
   }
 
   private ensureEvent(event: string): void {
