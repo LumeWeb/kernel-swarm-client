@@ -1,7 +1,6 @@
 import { EventEmitter } from "events";
 import { DataFn, ErrTuple } from "libskynet";
 import { Buffer } from "buffer";
-import { create } from "domain";
 
 const DHT_MODULE = "AQD1IgE4lTZkq1fqdoYGojKRNrSk0YQ_wrHbRtIiHDrnow";
 
