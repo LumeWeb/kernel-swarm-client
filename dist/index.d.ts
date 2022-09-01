@@ -25,7 +25,7 @@ export declare class Socket extends EventEmitter {
     on(eventName: string, listener: (...args: any[]) => void): this;
     off(type: string, listener: any): this;
     write(message: string | Buffer): void;
-    close(): void;
+    end(): void;
     private ensureEvent;
     private trackEvent;
 }
