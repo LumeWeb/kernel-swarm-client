@@ -166,7 +166,7 @@ export class Socket extends EventEmitter {
     callModule(DHT_MODULE, "write", { id: this.id, message });
   }
 
-  close(): void {
+  end(): void {
     callModule(DHT_MODULE, "socketExists", { id: this.id }).then(
       ([exists]: ErrTuple) => {
         if (exists) {
