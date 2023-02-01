@@ -23,6 +23,7 @@ export declare class Socket extends Client {
     off(type: string, listener: any): this;
     write(message: string | Buffer): void;
     end(): void;
+    join(topic: Buffer): void;
     private ensureEvent;
     private trackEvent;
 }

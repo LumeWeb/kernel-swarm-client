@@ -75,6 +75,9 @@ export class Socket extends Client {
             }
         });
     }
+    join(topic) {
+        this.callModule("join", { id: this.id, topic });
+    }
     ensureEvent(event) {
         if (!(event in this.eventUpdates)) {
             this.eventUpdates[event] = [];
