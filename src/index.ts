@@ -49,6 +49,10 @@ export class SwarmClient extends Client {
   public async getRelays(): Promise<string[]> {
     return this.callModuleReturn("getRelays", { swarm: this.swarm });
   }
+
+  join(topic: Buffer): void {
+    this.callModule("join", { id: this.id, topic });
+  }
 }
 
 export class Socket extends Client {
@@ -98,10 +102,6 @@ export class Socket extends Client {
         }
       }
     );
-  }
-
-  join(topic: Buffer): void {
-    this.callModule("join", { id: this.id, topic });
   }
 
   private ensureEvent(event: string): void {
