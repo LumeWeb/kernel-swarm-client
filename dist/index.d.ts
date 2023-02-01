@@ -8,6 +8,7 @@ export declare class SwarmClient extends Client {
     get swarm(): number | undefined;
     constructor(useDefaultDht?: boolean);
     connect(pubkey: string | Uint8Array): Promise<Socket>;
+    init(): Promise<ErrTuple>;
     ready(): Promise<ErrTuple>;
     addRelay(pubkey: string): Promise<void>;
     removeRelay(pubkey: string): Promise<void>;
