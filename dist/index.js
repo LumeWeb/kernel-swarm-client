@@ -39,7 +39,7 @@ export class SwarmClient extends Client {
     async getRelays() {
         return this.callModuleReturn("getRelays", { swarm: this.swarm });
     }
-    join(topic) {
+    async join(topic) {
         this.callModule("join", { id: this.id, topic });
     }
 }
