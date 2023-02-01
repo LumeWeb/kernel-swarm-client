@@ -1,24 +1,20 @@
 /// <reference types="node" />
-/// <reference types="node" />
-import { EventEmitter } from "events";
-import { ErrTuple } from "libskynet";
 import { Buffer } from "buffer";
-export declare class DHT {
-    private useDefaultDht;
+import { Client } from "@lumeweb/libkernel-universal";
+import { ErrTuple } from "@siaweb/libweb";
+export declare class SwarmClient extends Client {
+    private useDefaultSwarm;
     private id;
+    get swarm(): number | undefined;
     constructor(useDefaultDht?: boolean);
-    connect(pubkey: string): Promise<Socket>;
+    connect(pubkey: string | Uint8Array): Promise<Socket>;
     ready(): Promise<ErrTuple>;
     addRelay(pubkey: string): Promise<void>;
     removeRelay(pubkey: string): Promise<void>;
     clearRelays(): Promise<void>;
     getRelays(): Promise<string[]>;
-    getRelayServers(): Promise<string[]>;
-    private create;
-    close(): Promise<boolean>;
-    private setup;
 }
-export declare class Socket extends EventEmitter {
+export declare class Socket extends Client {
     private id;
     private eventUpdates;
     constructor(id: number);
@@ -29,4 +25,5 @@ export declare class Socket extends EventEmitter {
     private ensureEvent;
     private trackEvent;
 }
+export declare const createClient: (...args: any) => SwarmClient;
 //# sourceMappingURL=index.d.ts.map
