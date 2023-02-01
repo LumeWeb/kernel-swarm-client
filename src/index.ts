@@ -1,132 +1,56 @@
-import { EventEmitter } from "events";
-import { DataFn, ErrTuple } from "libskynet";
 import { Buffer } from "buffer";
+import { Client, factory } from "@lumeweb/libkernel-universal";
+import { hexToBuf, DataFn, ErrTuple } from "@siaweb/libweb";
 
-const DHT_MODULE = "AQD1IgE4lTZkq1fqdoYGojKRNrSk0YQ_wrHbRtIiHDrnow";
-
-let callModule: any, connectModule: any;
-
-async function loadLibs() {
-  if (callModule && connectModule) {
-    return;
-  }
-  if (typeof window !== "undefined" && window?.document) {
-    const pkg = await import("libkernel");
-    callModule = pkg.callModule;
-    connectModule = pkg.connectModule;
-  } else {
-    const pkg = await import("libkmodule");
-    callModule = pkg.callModule;
-    connectModule = pkg.connectModule;
-  }
-}
-
-export class DHT {
-  private useDefaultDht: boolean;
+export class SwarmClient extends Client {
+  private useDefaultSwarm: boolean;
   private id: number = 0;
 
-  constructor(useDefaultDht = true) {
-    this.useDefaultDht = useDefaultDht;
+  get swarm(): number | undefined {
+    return this.useDefaultSwarm ? undefined : this.id;
   }
 
-  public async connect(pubkey: string): Promise<Socket> {
-    await this.setup();
-    const dht = !this.useDefaultDht ? this.id : undefined;
-    const [resp, err] = await callModule(DHT_MODULE, "connect", {
-      pubkey,
-      dht,
-    });
-    if (err) {
-      throw new Error(err);
+  constructor(useDefaultDht = true) {
+    super();
+    this.useDefaultSwarm = useDefaultDht;
+  }
+
+  public async connect(pubkey: string | Uint8Array): Promise<Socket> {
+    if (typeof pubkey === "string") {
+      const buf = hexToBuf(pubkey);
+      pubkey = this.handleErrorOrReturn(buf);
     }
-    return new Socket(resp.id);
+
+    const resp = this.callModuleReturn("connect", {
+      pubkey,
+      swarm: this.swarm,
+    }) as any;
+
+    return createSocket(resp.id);
   }
 
   async ready(): Promise<ErrTuple> {
-    await this.setup();
-    const dht = !this.useDefaultDht ? this.id : undefined;
-    return callModule(DHT_MODULE, "ready", { dht });
+    const dht = !this.useDefaultSwarm ? this.id : undefined;
+    return this.callModuleReturn("ready", { swarm: this.swarm });
   }
 
   public async addRelay(pubkey: string): Promise<void> {
-    await this.setup();
-    const dht = !this.useDefaultDht ? this.id : undefined;
-    const [, err] = await callModule(DHT_MODULE, "addRelay", { pubkey, dht });
-    if (err) {
-      throw new Error(err);
-    }
+    return this.callModuleReturn("addRelay", { pubkey, swarm: this.swarm });
   }
 
   public async removeRelay(pubkey: string): Promise<void> {
-    await this.setup();
-    const dht = !this.useDefaultDht ? this.id : undefined;
-    const [, err] = await callModule(DHT_MODULE, "removeRelay", {
-      pubkey,
-      dht,
-    });
-    if (err) {
-      throw new Error(err);
-    }
+    return this.callModuleReturn("removeRelay", { pubkey, swarm: this.swarm });
   }
 
   public async clearRelays(): Promise<void> {
-    await this.setup();
-    const dht = !this.useDefaultDht ? this.id : undefined;
-    await callModule(DHT_MODULE, "clearRelays", { dht });
+    return this.callModuleReturn("clearRelays", { swarm: this.swarm });
   }
   public async getRelays(): Promise<string[]> {
-    await this.setup();
-    const [list, err] = await callModule(DHT_MODULE, "getRelays");
-    if (err) {
-      throw new Error(err);
-    }
-
-    return list;
-  }
-  public async getRelayServers(): Promise<string[]> {
-    await this.setup();
-    const [list, err] = await callModule(DHT_MODULE, "getRelayServers");
-    if (err) {
-      throw new Error(err);
-    }
-
-    return list;
-  }
-
-  private async create() {
-    await loadLibs();
-    if (this.useDefaultDht || this.id > 0) {
-      return Promise.resolve();
-    }
-    const [dht, err] = await callModule(DHT_MODULE, "openDht");
-    if (err) {
-      throw new Error(err);
-    }
-
-    this.id = dht.dht;
-  }
-
-  public async close(): Promise<boolean> {
-    await this.setup();
-
-    if (this.useDefaultDht) {
-      return false;
-    }
-    const [, err] = await callModule(DHT_MODULE, "closeDht", { dht: this.id });
-    if (err) {
-      throw new Error(err);
-    }
-
-    return true;
-  }
-
-  private async setup() {
-    await loadLibs();
-    await this.create();
+    return this.callModuleReturn("getRelays", { swarm: this.swarm });
   }
 }
 
-export class Socket extends EventEmitter {
+export class Socket extends Client {
   private id: number;
   private eventUpdates: { [event: string]: DataFn[] } = {};
 
@@ -136,8 +60,7 @@ export class Socket extends EventEmitter {
   }
 
   on(eventName: string, listener: (...args: any[]) => void): this {
-    const [update, promise] = connectModule(
-      DHT_MODULE,
+    const [update, promise] = this.connectModule(
       "listenSocketEvent",
       { id: this.id, event: eventName },
       (data: any) => {
@@ -150,7 +73,7 @@ export class Socket extends EventEmitter {
       this.off(eventName, listener);
     });
 
-    return super.on(eventName, listener);
+    return super.on(eventName, listener) as this;
   }
 
   off(type: string, listener: any): this {
@@ -163,14 +86,14 @@ export class Socket extends EventEmitter {
   }
 
   write(message: string | Buffer): void {
-    callModule(DHT_MODULE, "write", { id: this.id, message });
+    this.callModule("write", { id: this.id, message });
   }
 
   end(): void {
-    callModule(DHT_MODULE, "socketExists", { id: this.id }).then(
+    this.callModule("socketExists", { id: this.id }).then(
       ([exists]: ErrTuple) => {
         if (exists) {
-          callModule(DHT_MODULE, "close", { id: this.id });
+          this.callModule("close", { id: this.id });
         }
       }
     );
@@ -187,3 +110,8 @@ export class Socket extends EventEmitter {
     this.eventUpdates[event].push(update);
   }
 }
+
+const MODULE = "_A73ORX4dxSkt7Cv8v6gtbV0W5EsLrdZX6SywPdSTFBPEg";
+
+export const createClient = factory<SwarmClient>(SwarmClient, MODULE);
+const createSocket = factory<Socket>(Socket, MODULE);

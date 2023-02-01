@@ -4,14 +4,11 @@
     "type": "module",
     "main": "dist/index.js",
     "dependencies": {
-        "buffer": "^6.0.3",
-        "events": "^3.3.0",
-        "libkernel": "^0.1.43",
-        "libkmodule": "^0.2.44",
-        "libskynet": "^0.0.62"
+        "@lumeweb/libkernel-universal": "git+https://git.lumeweb.com/LumeWeb/libkernel-universal.git",
+        "@siaweb/libweb": "git+https://git.lumeweb.com/LumeWeb/libsiaweb.git"
     },
     "devDependencies": {
-        "@types/node": "^18.0.6",
-        "prettier": "^2.7.1"
+        "@types/node": "^18.11.18",
+        "prettier": "^2.8.3"
     }
 }
