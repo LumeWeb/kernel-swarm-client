@@ -14,6 +14,7 @@ export declare class SwarmClient extends Client {
     removeRelay(pubkey: string): Promise<void>;
     clearRelays(): Promise<void>;
     getRelays(): Promise<string[]>;
+    join(topic: Buffer): void;
 }
 export declare class Socket extends Client {
     private id;
@@ -23,7 +24,6 @@ export declare class Socket extends Client {
     off(type: string, listener: any): this;
     write(message: string | Buffer): void;
     end(): void;
-    join(topic: Buffer): void;
     private ensureEvent;
     private trackEvent;
 }
