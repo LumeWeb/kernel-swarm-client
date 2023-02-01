@@ -28,9 +28,10 @@ export class SwarmClient extends Client {
 
     return createSocket(resp.id);
   }
-
+  async init(): Promise<ErrTuple> {
+    return this.callModuleReturn("init", { swarm: this.swarm });
+  }
   async ready(): Promise<ErrTuple> {
-    const dht = !this.useDefaultSwarm ? this.id : undefined;
     return this.callModuleReturn("ready", { swarm: this.swarm });
   }
 
