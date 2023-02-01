@@ -100,6 +100,10 @@ export class Socket extends Client {
     );
   }
 
+  join(topic: Buffer): void {
+    this.callModule("join", { id: this.id, topic });
+  }
+
   private ensureEvent(event: string): void {
     if (!(event in this.eventUpdates)) {
       this.eventUpdates[event] = [];
