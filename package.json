@@ -1,5 +1,5 @@
 {
-    "name": "@lumeweb/kernel-dht-client",
+    "name": "@lumeweb/kernel-swarm-client",
     "version": "0.1.0",
     "type": "module",
     "main": "dist/index.js",
