@@ -40,7 +40,7 @@ export class SwarmClient extends Client {
       "listenConnections",
       { swarm: this.swarm },
       (socketId: any) => {
-        this.emit("connection", createClient(socketId));
+        this.emit("connection", createSocket(socketId));
       }
     );
   }
