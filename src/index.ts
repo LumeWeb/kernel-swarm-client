@@ -33,8 +33,16 @@ export class SwarmClient extends Client {
   async init(): Promise<ErrTuple> {
     return this.callModuleReturn("init", { swarm: this.swarm });
   }
-  async ready(): Promise<ErrTuple> {
-    return this.callModuleReturn("ready", { swarm: this.swarm });
+  async ready(): Promise<void> {
+    await this.callModuleReturn("ready", { swarm: this.swarm });
+
+    this.connectModule(
+      "listenConnections",
+      { swarm: this.swarm },
+      (socketId: any) => {
+        this.emit("connection", createClient(socketId));
+      }
+    );
   }
 
   public async addRelay(pubkey: string): Promise<void> {
