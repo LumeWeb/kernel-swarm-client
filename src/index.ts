@@ -116,7 +116,7 @@ export class Socket extends Client {
     this.callModule("socketExists", { id: this.id }).then(
       ([exists]: ErrTuple) => {
         if (exists) {
-          this.callModule("close", { id: this.id });
+          this.callModule("socketClose", { id: this.id });
         }
       }
     );
