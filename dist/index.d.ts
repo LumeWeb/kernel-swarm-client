@@ -2,6 +2,7 @@
 import { Buffer } from "buffer";
 import { Client } from "@lumeweb/libkernel-universal";
 import { ErrTuple } from "@siaweb/libweb";
+import type { EventEmitter } from "eventemitter3";
 export declare class SwarmClient extends Client {
     private useDefaultSwarm;
     private id;
@@ -9,7 +10,7 @@ export declare class SwarmClient extends Client {
     constructor(useDefaultDht?: boolean);
     connect(pubkey: string | Uint8Array): Promise<Socket>;
     init(): Promise<ErrTuple>;
-    ready(): Promise<ErrTuple>;
+    ready(): Promise<void>;
     addRelay(pubkey: string): Promise<void>;
     removeRelay(pubkey: string): Promise<void>;
     clearRelays(): Promise<void>;
@@ -20,8 +21,8 @@ export declare class Socket extends Client {
     private id;
     private eventUpdates;
     constructor(id: number);
-    on(eventName: string, listener: (...args: any[]) => void): this;
-    off(type: string, listener: any): this;
+    on<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn: EventEmitter.EventListener<string | symbol, T>, context?: any): this;
+    off<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn?: EventEmitter.EventListener<string | symbol, T>, context?: any, once?: boolean): this;
     write(message: string | Buffer): void;
     end(): void;
     private ensureEvent;

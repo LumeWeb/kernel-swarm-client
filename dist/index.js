@@ -25,7 +25,10 @@ export class SwarmClient extends Client {
         return this.callModuleReturn("init", { swarm: this.swarm });
     }
     async ready() {
-        return this.callModuleReturn("ready", { swarm: this.swarm });
+        await this.callModuleReturn("ready", { swarm: this.swarm });
+        this.connectModule("listenConnections", { swarm: this.swarm }, (socketId) => {
+            this.emit("connection", createSocket(socketId));
+        });
     }
     async addRelay(pubkey) {
         return this.callModuleReturn("addRelay", { pubkey, swarm: this.swarm });
@@ -50,23 +53,23 @@ export class Socket extends Client {
         super();
         this.id = id;
     }
-    on(eventName, listener) {
-        const [update, promise] = this.connectModule("listenSocketEvent", { id: this.id, event: eventName }, (data) => {
-            this.emit(eventName, data);
+    on(event, fn, context) {
+        const [update, promise] = this.connectModule("listenSocketEvent", { id: this.id, event: event }, (data) => {
+            this.emit(event, data);
         });
-        this.trackEvent(eventName, update);
+        this.trackEvent(event, update);
         promise.then(() => {
-            this.off(eventName, listener);
+            this.off(event, fn);
         });
-        return super.on(eventName, listener);
+        return super.on(event, fn, context);
     }
-    off(type, listener) {
-        const updates = [...this.eventUpdates[type]];
-        this.eventUpdates[type] = [];
+    off(event, fn, context, once) {
+        const updates = [...this.eventUpdates[event]];
+        this.eventUpdates[event] = [];
         for (const func of updates) {
-            func({ action: "off" });
+            func();
         }
-        return super.off(type, listener);
+        return super.off(event, fn, context, once);
     }
     write(message) {
         this.callModule("write", { id: this.id, message });
