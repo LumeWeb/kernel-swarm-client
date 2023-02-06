@@ -109,7 +109,7 @@ export class Socket extends Client {
   }
 
   write(message: string | Buffer): void {
-    this.callModule("write", { id: this.id, message });
+    this.callModule("socketWrite", { id: this.id, message });
   }
 
   end(): void {
