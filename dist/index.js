@@ -54,7 +54,7 @@ export class Socket extends Client {
         this.id = id;
     }
     on(event, fn, context) {
-        const [update, promise] = this.connectModule("listenSocketEvent", { id: this.id, event: event }, (data) => {
+        const [update, promise] = this.connectModule("socketListenEvent", { id: this.id, event: event }, (data) => {
             this.emit(event, data);
         });
         this.trackEvent(event, update);
@@ -72,12 +72,12 @@ export class Socket extends Client {
         return super.off(event, fn, context, once);
     }
     write(message) {
-        this.callModule("write", { id: this.id, message });
+        this.callModule("socketWrite", { id: this.id, message });
     }
     end() {
         this.callModule("socketExists", { id: this.id }).then(([exists]) => {
             if (exists) {
-                this.callModule("close", { id: this.id });
+                this.callModule("socketClose", { id: this.id });
             }
         });
     }
