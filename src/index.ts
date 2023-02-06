@@ -2,6 +2,8 @@ import { Buffer } from "buffer";
 import { Client, factory } from "@lumeweb/libkernel-universal";
 import { hexToBuf, DataFn, ErrTuple } from "@siaweb/libweb";
 
+import type { EventEmitter } from "eventemitter3";
+
 export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
   private id: number = 0;
@@ -63,31 +65,39 @@ export class Socket extends Client {
     super();
     this.id = id;
   }
-
-  on(eventName: string, listener: (...args: any[]) => void): this {
+  on<T extends EventEmitter.EventNames<string | symbol>>(
+    event: T,
+    fn: EventEmitter.EventListener<string | symbol, T>,
+    context?: any
+  ): this {
     const [update, promise] = this.connectModule(
       "listenSocketEvent",
-      { id: this.id, event: eventName },
+      { id: this.id, event: event },
       (data: any) => {
-        this.emit(eventName, data);
+        this.emit(event, data);
       }
     );
-    this.trackEvent(eventName, update);
+    this.trackEvent(event as string, update);
 
     promise.then(() => {
-      this.off(eventName, listener);
+      this.off(event as string, fn);
     });
 
-    return super.on(eventName, listener) as this;
+    return super.on(event, fn, context) as this;
   }
 
-  off(type: string, listener: any): this {
-    const updates = [...this.eventUpdates[type]];
-    this.eventUpdates[type] = [];
+  off<T extends EventEmitter.EventNames<string | symbol>>(
+    event: T,
+    fn?: EventEmitter.EventListener<string | symbol, T>,
+    context?: any,
+    once?: boolean
+  ): this {
+    const updates = [...this.eventUpdates[event as string]];
+    this.eventUpdates[event as string] = [];
     for (const func of updates) {
-      func({ action: "off" });
+      func();
     }
-    return super.off(type, listener);
+    return super.off(event, fn, context, once);
   }
 
   write(message: string | Buffer): void {
