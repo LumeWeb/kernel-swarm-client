@@ -6,8 +6,8 @@ import type { EventEmitter } from "eventemitter3";
 export declare class SwarmClient extends Client {
     private useDefaultSwarm;
     private id;
-    get swarm(): number | undefined;
     constructor(useDefaultDht?: boolean);
+    get swarm(): number | undefined;
     connect(pubkey: string | Uint8Array): Promise<Socket>;
     init(): Promise<ErrTuple>;
     ready(): Promise<void>;
@@ -21,6 +21,11 @@ export declare class Socket extends Client {
     private id;
     private eventUpdates;
     constructor(id: number);
+    private _remotePublicKey?;
+    get remotePublicKey(): Uint8Array;
+    private _rawStream?;
+    get rawStream(): Uint8Array;
+    setup(): Promise<void>;
     on<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn: EventEmitter.EventListener<string | symbol, T>, context?: any): this;
     off<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn?: EventEmitter.EventListener<string | symbol, T>, context?: any, once?: boolean): this;
     write(message: string | Buffer): void;

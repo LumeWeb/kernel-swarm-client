@@ -3,12 +3,12 @@ import { hexToBuf } from "@siaweb/libweb";
 export class SwarmClient extends Client {
     useDefaultSwarm;
     id = 0;
-    get swarm() {
-        return this.useDefaultSwarm ? undefined : this.id;
-    }
     constructor(useDefaultDht = true) {
         super();
         this.useDefaultSwarm = useDefaultDht;
+    }
+    get swarm() {
+        return this.useDefaultSwarm ? undefined : this.id;
     }
     async connect(pubkey) {
         if (typeof pubkey === "string") {
@@ -26,8 +26,8 @@ export class SwarmClient extends Client {
     }
     async ready() {
         await this.callModuleReturn("ready", { swarm: this.swarm });
-        this.connectModule("listenConnections", { swarm: this.swarm }, (socketId) => {
-            this.emit("connection", createSocket(socketId));
+        this.connectModule("listenConnections", { swarm: this.swarm }, async (socketId) => {
+            this.emit("connection", await createSocket(socketId));
         });
     }
     async addRelay(pubkey) {
@@ -52,6 +52,19 @@ export class Socket extends Client {
     constructor(id) {
         super();
         this.id = id;
+    }
+    _remotePublicKey;
+    get remotePublicKey() {
+        return this._remotePublicKey;
+    }
+    _rawStream;
+    get rawStream() {
+        return this._rawStream;
+    }
+    async setup() {
+        let info = await this.callModuleReturn("socketGetInfo", { id: this.id });
+        this._remotePublicKey = info.remotePublicKey;
+        this._rawStream = info.rawStream;
     }
     on(event, fn, context) {
         const [update, promise] = this.connectModule("socketListenEvent", { id: this.id, event: event }, (data) => {
@@ -93,4 +106,9 @@ export class Socket extends Client {
 }
 const MODULE = "_A7ClA0mSa1-Pg5c4V3C0H_fnhAFjgccITYT83Euc7t_9A";
 export const createClient = factory(SwarmClient, MODULE);
-const createSocket = factory(Socket, MODULE);
+const socketFactory = factory(Socket, MODULE);
+const createSocket = async (...args) => {
+    const socket = socketFactory(...args);
+    await socket.setup();
+    return socket;
+};
