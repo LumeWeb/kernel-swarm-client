@@ -8,13 +8,13 @@ export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
   private id: number = 0;
 
-  get swarm(): number | undefined {
-    return this.useDefaultSwarm ? undefined : this.id;
-  }
-
   constructor(useDefaultDht = true) {
     super();
     this.useDefaultSwarm = useDefaultDht;
+  }
+
+  get swarm(): number | undefined {
+    return this.useDefaultSwarm ? undefined : this.id;
   }
 
   public async connect(pubkey: string | Uint8Array): Promise<Socket> {
@@ -39,8 +39,8 @@ export class SwarmClient extends Client {
     this.connectModule(
       "listenConnections",
       { swarm: this.swarm },
-      (socketId: any) => {
-        this.emit("connection", createSocket(socketId));
+      async (socketId: any) => {
+        this.emit("connection", await createSocket(socketId));
       }
     );
   }
@@ -65,6 +65,12 @@ export class SwarmClient extends Client {
   }
 }
 
+interface SocketRawStream {
+  remoteHost: string;
+  remotePort: number;
+  remoteFamily: string;
+}
+
 export class Socket extends Client {
   private id: number;
   private eventUpdates: { [event: string]: DataFn[] } = {};
@@ -73,6 +79,26 @@ export class Socket extends Client {
     super();
     this.id = id;
   }
+
+  private _remotePublicKey?: Uint8Array;
+
+  get remotePublicKey(): Uint8Array {
+    return this._remotePublicKey as Uint8Array;
+  }
+
+  private _rawStream?: Uint8Array;
+
+  get rawStream(): Uint8Array {
+    return this._rawStream as Uint8Array;
+  }
+
+  async setup() {
+    let info = await this.callModuleReturn("socketGetInfo", { id: this.id });
+
+    this._remotePublicKey = info.remotePublicKey;
+    this._rawStream = info.rawStream;
+  }
+
   on<T extends EventEmitter.EventNames<string | symbol>>(
     event: T,
     fn: EventEmitter.EventListener<string | symbol, T>,
@@ -137,4 +163,12 @@ export class Socket extends Client {
 const MODULE = "_A7ClA0mSa1-Pg5c4V3C0H_fnhAFjgccITYT83Euc7t_9A";
 
 export const createClient = factory<SwarmClient>(SwarmClient, MODULE);
-const createSocket = factory<Socket>(Socket, MODULE);
+
+const socketFactory = factory<Socket>(Socket, MODULE);
+const createSocket = async (...args: any): Promise<Socket> => {
+  const socket = socketFactory(...args);
+
+  await socket.setup();
+
+  return socket;
+};
