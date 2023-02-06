@@ -79,7 +79,7 @@ export class Socket extends Client {
     context?: any
   ): this {
     const [update, promise] = this.connectModule(
-      "listenSocketEvent",
+      "socketListenEvent",
       { id: this.id, event: event },
       (data: any) => {
         this.emit(event, data);
