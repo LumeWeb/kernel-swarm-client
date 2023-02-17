@@ -31,9 +31,7 @@ export class SwarmClient extends Client {
         return createSocket(resp.id);
     }
     async init() {
-        const ret = await this.callModuleReturn("init", { swarm: this.swarm });
-        this._connectBackoff.reset();
-        return ret;
+        return await this.callModuleReturn("init", { swarm: this.swarm });
     }
     async ready() {
         if (this._ready) {
@@ -45,6 +43,7 @@ export class SwarmClient extends Client {
         this._ready = this.callModuleReturn("ready", { swarm: this.swarm });
         await this._ready;
         this._ready = undefined;
+        this._connectBackoff.reset();
     }
     async start() {
         const backoff = () => setImmediate(() => this._connectBackoff.backoff());
