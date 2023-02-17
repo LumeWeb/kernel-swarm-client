@@ -6,11 +6,10 @@
     "dependencies": {
         "@lumeweb/libkernel-universal": "git+https://git.lumeweb.com/LumeWeb/libkernel-universal.git",
         "@siaweb/libweb": "git+https://git.lumeweb.com/LumeWeb/libsiaweb.git",
-        "backoff": "^2.5.0",
+        "backoff.js": "^1.0.4",
         "eventemitter3": "^5.0.0"
     },
     "devDependencies": {
-        "@types/backoff": "^2.5.2",
         "@types/node": "^18.13.0",
         "prettier": "^2.8.4",
         "pretty": "^2.0.0",

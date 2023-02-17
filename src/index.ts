@@ -4,13 +4,14 @@ import { DataFn, ErrTuple, hexToBuf } from "@siaweb/libweb";
 
 import type { EventEmitter } from "eventemitter3";
 
-import backoff, { Backoff } from "backoff";
+// @ts-ignore
+import Backoff from "backoff.js";
 
 export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
   private id: number = 0;
   private _autoReconnect: boolean;
-  private _connectBackoff: Backoff;
+  private _connectBackoff: any;
 
   private _ready?: Promise<void>;
 
@@ -18,10 +19,9 @@ export class SwarmClient extends Client {
     super();
     this.useDefaultSwarm = useDefaultDht;
     this._autoReconnect = autoReconnect;
-    this._connectBackoff = backoff.fibonacci();
-
-    this._connectBackoff.on("ready", () => {
-      this.start();
+    this._connectBackoff = new Backoff({
+      strategy: "fibo",
+      maxAttempts: 0,
     });
   }
 
@@ -57,19 +57,14 @@ export class SwarmClient extends Client {
     await this._ready;
 
     this._ready = undefined;
-    this._connectBackoff.reset();
   }
 
   async start(): Promise<void> {
-    const backoff = () => setImmediate(() => this._connectBackoff.backoff());
+    this._connectBackoff.run(() => this.init());
 
-    try {
-      await this.init();
-    } catch (e) {
-      this.logErr(e);
-      backoff();
-      return;
-    }
+    this._connectBackoff.on("retry", (error: any) => {
+      this.logErr(error);
+    });
 
     await this.ready();
   }
@@ -84,7 +79,7 @@ export class SwarmClient extends Client {
     );
 
     await connect[1];
-    this._connectBackoff.backoff();
+    this.start();
   }
 
   public async addRelay(pubkey: string): Promise<void> {
