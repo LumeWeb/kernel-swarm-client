@@ -37,9 +37,7 @@ export class SwarmClient extends Client {
         if (this._ready) {
             return this._ready;
         }
-        this.connectModule("listenConnections", { swarm: this.swarm }, async (socketId) => {
-            this.emit("connection", await createSocket(socketId));
-        });
+        this._listen();
         this._ready = this.callModuleReturn("ready", { swarm: this.swarm });
         await this._ready;
         this._ready = undefined;
@@ -56,6 +54,13 @@ export class SwarmClient extends Client {
             return;
         }
         await this.ready();
+    }
+    async _listen() {
+        const connect = this.connectModule("listenConnections", { swarm: this.swarm }, async (socketId) => {
+            this.emit("connection", await createSocket(socketId));
+        });
+        await connect[1];
+        this._connectBackoff.backoff();
     }
     async addRelay(pubkey) {
         return this.callModuleReturn("addRelay", { pubkey, swarm: this.swarm });

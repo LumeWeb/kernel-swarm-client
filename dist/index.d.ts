@@ -15,6 +15,7 @@ export declare class SwarmClient extends Client {
     init(): Promise<ErrTuple>;
     ready(): Promise<void>;
     start(): Promise<void>;
+    private _listen;
     addRelay(pubkey: string): Promise<void>;
     removeRelay(pubkey: string): Promise<void>;
     clearRelays(): Promise<void>;
