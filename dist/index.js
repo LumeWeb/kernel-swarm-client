@@ -44,7 +44,7 @@ export class SwarmClient extends Client {
         this._ready = undefined;
     }
     async start() {
-        this._connectBackoff.run(() => this.init());
+        await this._connectBackoff.run(() => this.init());
         this._connectBackoff.on("retry", (error) => {
             this.logErr(error);
         });
