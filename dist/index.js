@@ -1,11 +1,20 @@
 import { Client, factory } from "@lumeweb/libkernel-universal";
 import { hexToBuf } from "@siaweb/libweb";
+import backoff from "backoff";
 export class SwarmClient extends Client {
     useDefaultSwarm;
     id = 0;
-    constructor(useDefaultDht = true) {
+    _autoReconnect;
+    _connectBackoff;
+    _ready;
+    constructor(useDefaultDht = true, autoReconnect = false) {
         super();
         this.useDefaultSwarm = useDefaultDht;
+        this._autoReconnect = autoReconnect;
+        this._connectBackoff = backoff.fibonacci();
+        this._connectBackoff.on("ready", () => {
+            this.start();
+        });
     }
     get swarm() {
         return this.useDefaultSwarm ? undefined : this.id;
@@ -22,13 +31,33 @@ export class SwarmClient extends Client {
         return createSocket(resp.id);
     }
     async init() {
-        return this.callModuleReturn("init", { swarm: this.swarm });
+        const ret = await this.callModuleReturn("init", { swarm: this.swarm });
+        this._connectBackoff.reset();
+        return ret;
     }
     async ready() {
-        await this.callModuleReturn("ready", { swarm: this.swarm });
+        if (this._ready) {
+            return this._ready;
+        }
+        this._ready = this.callModuleReturn("ready", { swarm: this.swarm });
+        await this._ready;
         this.connectModule("listenConnections", { swarm: this.swarm }, async (socketId) => {
             this.emit("connection", await createSocket(socketId));
         });
+        this._ready = undefined;
+    }
+    async start() {
+        let ready = this.ready();
+        const backoff = () => setImmediate(() => this._connectBackoff.backoff());
+        try {
+            await this.init();
+        }
+        catch (e) {
+            this.logErr(e);
+            backoff();
+        }
+        this.once("close", backoff);
+        await ready;
     }
     async addRelay(pubkey) {
         return this.callModuleReturn("addRelay", { pubkey, swarm: this.swarm });

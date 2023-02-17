@@ -6,11 +6,15 @@ import type { EventEmitter } from "eventemitter3";
 export declare class SwarmClient extends Client {
     private useDefaultSwarm;
     private id;
-    constructor(useDefaultDht?: boolean);
+    private _autoReconnect;
+    private _connectBackoff;
+    private _ready?;
+    constructor(useDefaultDht?: boolean, autoReconnect?: boolean);
     get swarm(): number | undefined;
     connect(pubkey: string | Uint8Array): Promise<Socket>;
     init(): Promise<ErrTuple>;
     ready(): Promise<void>;
+    start(): Promise<void>;
     addRelay(pubkey: string): Promise<void>;
     removeRelay(pubkey: string): Promise<void>;
     clearRelays(): Promise<void>;
