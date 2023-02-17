@@ -69,8 +69,6 @@ export class SwarmClient extends Client {
   }
 
   async start(): Promise<void> {
-    let ready = this.ready();
-
     const backoff = () => setImmediate(() => this._connectBackoff.backoff());
 
     try {
@@ -78,11 +76,10 @@ export class SwarmClient extends Client {
     } catch (e) {
       this.logErr(e);
       backoff();
+      return;
     }
 
-    this.once("close", backoff);
-
-    await ready;
+    await this.ready();
   }
 
   public async addRelay(pubkey: string): Promise<void> {
