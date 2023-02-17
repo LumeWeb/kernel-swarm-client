@@ -1,6 +1,6 @@
 import { Buffer } from "buffer";
 import { Client, factory } from "@lumeweb/libkernel-universal";
-import { hexToBuf, DataFn, ErrTuple } from "@siaweb/libweb";
+import { DataFn, ErrTuple, hexToBuf } from "@siaweb/libweb";
 
 import type { EventEmitter } from "eventemitter3";
 
@@ -43,10 +43,7 @@ export class SwarmClient extends Client {
     return createSocket(resp.id);
   }
   async init(): Promise<ErrTuple> {
-    const ret = await this.callModuleReturn("init", { swarm: this.swarm });
-    this._connectBackoff.reset();
-
-    return ret;
+    return await this.callModuleReturn("init", { swarm: this.swarm });
   }
   async ready(): Promise<void> {
     if (this._ready) {
@@ -66,6 +63,7 @@ export class SwarmClient extends Client {
     await this._ready;
 
     this._ready = undefined;
+    this._connectBackoff.reset();
   }
 
   async start(): Promise<void> {
