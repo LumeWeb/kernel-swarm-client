@@ -1,6 +1,7 @@
 import { Client, factory } from "@lumeweb/libkernel-universal";
 import { hexToBuf } from "@siaweb/libweb";
-import backoff from "backoff";
+// @ts-ignore
+import Backoff from "backoff.js";
 export class SwarmClient extends Client {
     useDefaultSwarm;
     id = 0;
@@ -11,9 +12,9 @@ export class SwarmClient extends Client {
         super();
         this.useDefaultSwarm = useDefaultDht;
         this._autoReconnect = autoReconnect;
-        this._connectBackoff = backoff.fibonacci();
-        this._connectBackoff.on("ready", () => {
-            this.start();
+        this._connectBackoff = new Backoff({
+            strategy: "fibo",
+            maxAttempts: 0,
         });
     }
     get swarm() {
@@ -41,18 +42,12 @@ export class SwarmClient extends Client {
         this._ready = this.callModuleReturn("ready", { swarm: this.swarm });
         await this._ready;
         this._ready = undefined;
-        this._connectBackoff.reset();
     }
     async start() {
-        const backoff = () => setImmediate(() => this._connectBackoff.backoff());
-        try {
-            await this.init();
-        }
-        catch (e) {
-            this.logErr(e);
-            backoff();
-            return;
-        }
+        this._connectBackoff.run(() => this.init());
+        this._connectBackoff.on("retry", (error) => {
+            this.logErr(error);
+        });
         await this.ready();
     }
     async _listen() {
@@ -60,7 +55,7 @@ export class SwarmClient extends Client {
             this.emit("connection", await createSocket(socketId));
         });
         await connect[1];
-        this._connectBackoff.backoff();
+        this.start();
     }
     async addRelay(pubkey) {
         return this.callModuleReturn("addRelay", { pubkey, swarm: this.swarm });
