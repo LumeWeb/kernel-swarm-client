@@ -4,13 +4,25 @@ import { hexToBuf, DataFn, ErrTuple } from "@siaweb/libweb";
 
 import type { EventEmitter } from "eventemitter3";
 
+import backoff, { Backoff } from "backoff";
+
 export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
   private id: number = 0;
+  private _autoReconnect: boolean;
+  private _connectBackoff: Backoff;
 
-  constructor(useDefaultDht = true) {
+  private _ready?: Promise<void>;
+
+  constructor(useDefaultDht = true, autoReconnect = false) {
     super();
     this.useDefaultSwarm = useDefaultDht;
+    this._autoReconnect = autoReconnect;
+    this._connectBackoff = backoff.fibonacci();
+
+    this._connectBackoff.on("ready", () => {
+      this.start();
+    });
   }
 
   get swarm(): number | undefined {
@@ -31,10 +43,19 @@ export class SwarmClient extends Client {
     return createSocket(resp.id);
   }
   async init(): Promise<ErrTuple> {
-    return this.callModuleReturn("init", { swarm: this.swarm });
+    const ret = await this.callModuleReturn("init", { swarm: this.swarm });
+    this._connectBackoff.reset();
+
+    return ret;
   }
   async ready(): Promise<void> {
-    await this.callModuleReturn("ready", { swarm: this.swarm });
+    if (this._ready) {
+      return this._ready;
+    }
+
+    this._ready = this.callModuleReturn("ready", { swarm: this.swarm });
+
+    await this._ready;
 
     this.connectModule(
       "listenConnections",
@@ -43,6 +64,25 @@ export class SwarmClient extends Client {
         this.emit("connection", await createSocket(socketId));
       }
     );
+
+    this._ready = undefined;
+  }
+
+  async start(): Promise<void> {
+    let ready = this.ready();
+
+    const backoff = () => setImmediate(() => this._connectBackoff.backoff());
+
+    try {
+      await this.init();
+    } catch (e) {
+      this.logErr(e);
+      backoff();
+    }
+
+    this.once("close", backoff);
+
+    await ready;
   }
 
   public async addRelay(pubkey: string): Promise<void> {
