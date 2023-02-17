@@ -14,7 +14,7 @@ export class SwarmClient extends Client {
         this._autoReconnect = autoReconnect;
         this._connectBackoff = new Backoff({
             strategy: "fibo",
-            maxAttempts: 0,
+            maxAttempts: Number.MAX_SAFE_INTEGER,
         });
     }
     get swarm() {
