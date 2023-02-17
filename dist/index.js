@@ -47,7 +47,6 @@ export class SwarmClient extends Client {
         this._ready = undefined;
     }
     async start() {
-        let ready = this.ready();
         const backoff = () => setImmediate(() => this._connectBackoff.backoff());
         try {
             await this.init();
@@ -55,9 +54,9 @@ export class SwarmClient extends Client {
         catch (e) {
             this.logErr(e);
             backoff();
+            return;
         }
-        this.once("close", backoff);
-        await ready;
+        await this.ready();
     }
     async addRelay(pubkey) {
         return this.callModuleReturn("addRelay", { pubkey, swarm: this.swarm });
