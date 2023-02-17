@@ -39,11 +39,11 @@ export class SwarmClient extends Client {
         if (this._ready) {
             return this._ready;
         }
-        this._ready = this.callModuleReturn("ready", { swarm: this.swarm });
-        await this._ready;
         this.connectModule("listenConnections", { swarm: this.swarm }, async (socketId) => {
             this.emit("connection", await createSocket(socketId));
         });
+        this._ready = this.callModuleReturn("ready", { swarm: this.swarm });
+        await this._ready;
         this._ready = undefined;
     }
     async start() {
