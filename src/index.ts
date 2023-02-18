@@ -169,14 +169,6 @@ export class Socket extends Client {
     return super.on(event, fn, context) as this;
   }
 
-  onSelf<T extends EventEmitter.EventNames<string | symbol>>(
-    event: T,
-    fn: EventEmitter.EventListener<string | symbol, T>,
-    context?: any
-  ): this {
-    return super.on(event, fn, context) as this;
-  }
-
   off<T extends EventEmitter.EventNames<string | symbol>>(
     event: T,
     fn?: EventEmitter.EventListener<string | symbol, T>,
@@ -188,15 +180,6 @@ export class Socket extends Client {
     for (const func of updates) {
       func();
     }
-    return super.off(event, fn, context, once);
-  }
-
-  offSelf<T extends EventEmitter.EventNames<string | symbol>>(
-    event: T,
-    fn?: EventEmitter.EventListener<string | symbol, T>,
-    context?: any,
-    once?: boolean
-  ): this {
     return super.off(event, fn, context, once);
   }
 
