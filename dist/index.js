@@ -8,6 +8,7 @@ export class SwarmClient extends Client {
     _autoReconnect;
     _connectBackoff;
     _ready;
+    _topics = new Set();
     constructor(useDefaultDht = true, autoReconnect = false) {
         super();
         this.useDefaultSwarm = useDefaultDht;
@@ -42,6 +43,9 @@ export class SwarmClient extends Client {
         this._ready = this.callModuleReturn("ready", { swarm: this.swarm });
         await this._ready;
         this._ready = undefined;
+        for (const topic of this._topics) {
+            await this.join(topic);
+        }
     }
     async start() {
         await this._connectBackoff.run(() => this.init());
@@ -70,6 +74,7 @@ export class SwarmClient extends Client {
         return this.callModuleReturn("getRelays", { swarm: this.swarm });
     }
     async join(topic) {
+        this._topics.add(topic);
         this.callModule("join", { id: this.id, topic });
     }
 }
@@ -103,12 +108,18 @@ export class Socket extends Client {
         });
         return super.on(event, fn, context);
     }
+    onSelf(event, fn, context) {
+        return super.on(event, fn, context);
+    }
     off(event, fn, context, once) {
         const updates = [...this.eventUpdates[event]];
         this.eventUpdates[event] = [];
         for (const func of updates) {
             func();
         }
+        return super.off(event, fn, context, once);
+    }
+    offSelf(event, fn, context, once) {
         return super.off(event, fn, context, once);
     }
     write(message) {

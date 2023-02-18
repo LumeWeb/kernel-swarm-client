@@ -9,6 +9,7 @@ export declare class SwarmClient extends Client {
     private _autoReconnect;
     private _connectBackoff;
     private _ready?;
+    private _topics;
     constructor(useDefaultDht?: boolean, autoReconnect?: boolean);
     get swarm(): number | undefined;
     connect(pubkey: string | Uint8Array): Promise<Socket>;
@@ -20,7 +21,7 @@ export declare class SwarmClient extends Client {
     removeRelay(pubkey: string): Promise<void>;
     clearRelays(): Promise<void>;
     getRelays(): Promise<string[]>;
-    join(topic: Buffer): Promise<void>;
+    join(topic: Buffer | Uint8Array): Promise<void>;
 }
 export declare class Socket extends Client {
     private id;
@@ -32,7 +33,9 @@ export declare class Socket extends Client {
     get rawStream(): Uint8Array;
     setup(): Promise<void>;
     on<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn: EventEmitter.EventListener<string | symbol, T>, context?: any): this;
+    onSelf<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn: EventEmitter.EventListener<string | symbol, T>, context?: any): this;
     off<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn?: EventEmitter.EventListener<string | symbol, T>, context?: any, once?: boolean): this;
+    offSelf<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn?: EventEmitter.EventListener<string | symbol, T>, context?: any, once?: boolean): this;
     write(message: string | Buffer): void;
     end(): void;
     private ensureEvent;
