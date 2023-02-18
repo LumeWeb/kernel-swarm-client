@@ -112,18 +112,12 @@ export class Socket extends Client {
         });
         return super.on(event, fn, context);
     }
-    onSelf(event, fn, context) {
-        return super.on(event, fn, context);
-    }
     off(event, fn, context, once) {
         const updates = [...this.eventUpdates[event]];
         this.eventUpdates[event] = [];
         for (const func of updates) {
             func();
         }
-        return super.off(event, fn, context, once);
-    }
-    offSelf(event, fn, context, once) {
         return super.off(event, fn, context, once);
     }
     write(message) {
