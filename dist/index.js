@@ -3,7 +3,6 @@ import { hexToBuf } from "@siaweb/libweb";
 import { blake2b } from "@noble/hashes/blake2b";
 // @ts-ignore
 import Backoff from "backoff.js";
-const PROTOCOL = "lumeweb.proxy.handshake";
 export class SwarmClient extends Client {
     useDefaultSwarm;
     id = 0;
@@ -77,7 +76,7 @@ export class SwarmClient extends Client {
     }
     async join(topic) {
         if (typeof topic === "string") {
-            topic = blake2b(PROTOCOL);
+            topic = blake2b(topic);
         }
         this._topics.add(topic);
         this.callModule("join", { id: this.id, topic });
