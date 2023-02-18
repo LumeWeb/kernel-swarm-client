@@ -8,8 +8,6 @@ import type { EventEmitter } from "eventemitter3";
 // @ts-ignore
 import Backoff from "backoff.js";
 
-const PROTOCOL = "lumeweb.proxy.handshake";
-
 export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
   private id: number = 0;
@@ -108,7 +106,7 @@ export class SwarmClient extends Client {
 
   public async join(topic: Buffer | Uint8Array | string): Promise<void> {
     if (typeof topic === "string") {
-      topic = blake2b(PROTOCOL);
+      topic = blake2b(topic);
     }
 
     this._topics.add(topic);
