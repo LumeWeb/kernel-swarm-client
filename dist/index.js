@@ -76,7 +76,7 @@ export class SwarmClient extends Client {
     }
     async join(topic) {
         if (typeof topic === "string") {
-            topic = blake2b(topic);
+            topic = blake2b(topic, { dkLen: 32 });
         }
         this._topics.add(topic);
         this.callModule("join", { id: this.id, topic });
