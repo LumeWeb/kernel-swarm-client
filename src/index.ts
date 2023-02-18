@@ -106,7 +106,7 @@ export class SwarmClient extends Client {
 
   public async join(topic: Buffer | Uint8Array | string): Promise<void> {
     if (typeof topic === "string") {
-      topic = blake2b(topic);
+      topic = blake2b(topic, { dkLen: 32 });
     }
 
     this._topics.add(topic);
