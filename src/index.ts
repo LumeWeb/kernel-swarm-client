@@ -15,6 +15,8 @@ export class SwarmClient extends Client {
 
   private _ready?: Promise<void>;
 
+  private _topics: Set<Uint8Array> = new Set<Uint8Array>();
+
   constructor(useDefaultDht = true, autoReconnect = false) {
     super();
     this.useDefaultSwarm = useDefaultDht;
@@ -57,6 +59,10 @@ export class SwarmClient extends Client {
     await this._ready;
 
     this._ready = undefined;
+
+    for (const topic of this._topics) {
+      await this.join(topic);
+    }
   }
 
   async start(): Promise<void> {
@@ -97,7 +103,8 @@ export class SwarmClient extends Client {
     return this.callModuleReturn("getRelays", { swarm: this.swarm });
   }
 
-  public async join(topic: Buffer): Promise<void> {
+  public async join(topic: Buffer | Uint8Array): Promise<void> {
+    this._topics.add(topic);
     this.callModule("join", { id: this.id, topic });
   }
 }
@@ -157,6 +164,14 @@ export class Socket extends Client {
     return super.on(event, fn, context) as this;
   }
 
+  onSelf<T extends EventEmitter.EventNames<string | symbol>>(
+    event: T,
+    fn: EventEmitter.EventListener<string | symbol, T>,
+    context?: any
+  ): this {
+    return super.on(event, fn, context) as this;
+  }
+
   off<T extends EventEmitter.EventNames<string | symbol>>(
     event: T,
     fn?: EventEmitter.EventListener<string | symbol, T>,
@@ -168,6 +183,15 @@ export class Socket extends Client {
     for (const func of updates) {
       func();
     }
+    return super.off(event, fn, context, once);
+  }
+
+  offSelf<T extends EventEmitter.EventNames<string | symbol>>(
+    event: T,
+    fn?: EventEmitter.EventListener<string | symbol, T>,
+    context?: any,
+    once?: boolean
+  ): this {
     return super.off(event, fn, context, once);
   }
 
