@@ -10,6 +10,14 @@ export class SwarmClient extends Client {
     _connectBackoff;
     _ready;
     _topics = new Set();
+    get dht() {
+        const self = this;
+        return {
+            async ready() {
+                return self.ready();
+            },
+        };
+    }
     constructor(useDefaultDht = true, autoReconnect = false) {
         super();
         this.useDefaultSwarm = useDefaultDht;

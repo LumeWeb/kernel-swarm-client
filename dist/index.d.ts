@@ -10,6 +10,9 @@ export declare class SwarmClient extends Client {
     private _connectBackoff;
     private _ready?;
     private _topics;
+    get dht(): {
+        ready(): Promise<void>;
+    };
     constructor(useDefaultDht?: boolean, autoReconnect?: boolean);
     get swarm(): number | undefined;
     connect(pubkey: string | Uint8Array): Promise<Socket>;
