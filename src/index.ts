@@ -18,6 +18,15 @@ export class SwarmClient extends Client {
 
   private _topics: Set<Uint8Array> = new Set<Uint8Array>();
 
+  get dht() {
+    const self = this;
+    return {
+      async ready() {
+        return self.ready();
+      },
+    };
+  }
+
   constructor(useDefaultDht = true, autoReconnect = false) {
     super();
     this.useDefaultSwarm = useDefaultDht;
