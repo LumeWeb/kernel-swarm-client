@@ -10,6 +10,7 @@ export declare class SwarmClient extends Client {
     private _connectBackoff;
     private _ready?;
     private _topics;
+    private _sockets;
     get dht(): {
         ready(): Promise<void>;
     };

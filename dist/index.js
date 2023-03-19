@@ -10,6 +10,7 @@ export class SwarmClient extends Client {
     _connectBackoff;
     _ready;
     _topics = new Set();
+    _sockets = new Map();
     get dht() {
         const self = this;
         return {
@@ -65,7 +66,11 @@ export class SwarmClient extends Client {
     }
     async _listen() {
         const connect = this.connectModule("listenConnections", { swarm: this.swarm }, async (socketId) => {
-            this.emit("connection", await createSocket(socketId));
+            const socket = this._sockets.get(socketId) ?? (await createSocket(socketId));
+            socket.on("close", () => {
+                this._sockets.delete(socketId);
+            });
+            this.emit("connection", socket);
         });
         await connect[1];
         this.start();
