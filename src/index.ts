@@ -40,6 +40,10 @@ export class SwarmClient extends Client {
       strategy: "fibo",
       maxAttempts: Number.MAX_SAFE_INTEGER,
     });
+
+    this._connectBackoff.on("retry", (error: any) => {
+      this.logErr(error);
+    });
   }
 
   get swarm(): number | undefined {
@@ -82,10 +86,6 @@ export class SwarmClient extends Client {
 
   async start(): Promise<void> {
     await this._connectBackoff.run(() => this.init());
-
-    this._connectBackoff.on("retry", (error: any) => {
-      this.logErr(error);
-    });
 
     await this.ready();
   }
