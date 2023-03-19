@@ -17,6 +17,7 @@ export class SwarmClient extends Client {
   private _ready?: Promise<void>;
 
   private _topics: Set<Uint8Array> = new Set<Uint8Array>();
+  private _sockets: Map<number, Socket> = new Map<number, Socket>();
 
   get dht() {
     const self = this;
@@ -90,7 +91,14 @@ export class SwarmClient extends Client {
       "listenConnections",
       { swarm: this.swarm },
       async (socketId: any) => {
-        this.emit("connection", await createSocket(socketId));
+        const socket =
+          this._sockets.get(socketId) ?? (await createSocket(socketId));
+
+        socket.on("close", () => {
+          this._sockets.delete(socketId);
+        });
+
+        this.emit("connection", socket);
       }
     );
 
