@@ -9,6 +9,7 @@ export class SwarmClient extends Client {
     _autoReconnect;
     _connectBackoff;
     _ready;
+    _connectionListener;
     _topics = new Set();
     _sockets = new Map();
     get dht() {
@@ -26,6 +27,9 @@ export class SwarmClient extends Client {
         this._connectBackoff = new Backoff({
             strategy: "fibo",
             maxAttempts: Number.MAX_SAFE_INTEGER,
+        });
+        this._connectBackoff.on("retry", (error) => {
+            this.logErr(error);
         });
     }
     get swarm() {
@@ -59,23 +63,23 @@ export class SwarmClient extends Client {
     }
     async start() {
         await this._connectBackoff.run(() => this.init());
-        this._connectBackoff.on("retry", (error) => {
-            this.logErr(error);
-        });
         await this.ready();
     }
     async _listen() {
-        const connect = this.connectModule("listenConnections", { swarm: this.swarm }, async (socketId) => {
-            const socket = this._sockets.get(socketId) ?? (await createSocket(socketId));
-            socket.on("close", () => {
-                this._sockets.delete(socketId);
+        if (!this._connectionListener) {
+            this._connectionListener = this.connectModule("listenConnections", { swarm: this.swarm }, async (socketId) => {
+                const socket = this._sockets.get(socketId) ?? (await createSocket(socketId));
+                socket.on("close", () => {
+                    this._sockets.delete(socketId);
+                });
+                if (!this._sockets.has(socketId)) {
+                    this._sockets.set(socketId, socket);
+                }
+                this.emit("connection", socket);
             });
-            if (!this._sockets.has(socketId)) {
-                this._sockets.set(socketId, socket);
-            }
-            this.emit("connection", socket);
-        });
-        await connect[1];
+        }
+        await this._connectionListener[1];
+        this._connectionListener = undefined;
         this.start();
     }
     async addRelay(pubkey) {

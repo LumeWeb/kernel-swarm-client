@@ -9,6 +9,7 @@ export declare class SwarmClient extends Client {
     private _autoReconnect;
     private _connectBackoff;
     private _ready?;
+    private _connectionListener?;
     private _topics;
     private _sockets;
     get dht(): {
