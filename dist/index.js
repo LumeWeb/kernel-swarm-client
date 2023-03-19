@@ -70,6 +70,9 @@ export class SwarmClient extends Client {
             socket.on("close", () => {
                 this._sockets.delete(socketId);
             });
+            if (!this._sockets.has(socketId)) {
+                this._sockets.set(socketId, socket);
+            }
             this.emit("connection", socket);
         });
         await connect[1];
