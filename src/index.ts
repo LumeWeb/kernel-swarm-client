@@ -2,6 +2,7 @@ import { Buffer } from "buffer";
 import { Client, factory } from "@lumeweb/libkernel-universal";
 import { DataFn, ErrTuple, hexToBuf } from "@siaweb/libweb";
 import { blake2b } from "@noble/hashes/blake2b";
+import b4a from "b4a";
 
 import type { EventEmitter } from "eventemitter3";
 
@@ -56,12 +57,15 @@ export class SwarmClient extends Client {
       pubkey = this.handleErrorOrReturn(buf);
     }
 
-    const resp = this.callModuleReturn("connect", {
-      pubkey,
-      swarm: this.swarm,
-    }) as any;
+    let existing = Array.from(this._sockets.values()).filter((socket) => {
+      return b4a.equals(socket.remotePublicKey, pubkey as Uint8Array);
+    });
 
-    return createSocket(resp.id);
+    if (existing.length) {
+      return existing[0] as Socket;
+    }
+
+    throw new Error("not implemented");
   }
   async init(): Promise<ErrTuple> {
     return await this.callModuleReturn("init", { swarm: this.swarm });

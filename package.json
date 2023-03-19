@@ -7,10 +7,12 @@
         "@lumeweb/libkernel-universal": "git+https://git.lumeweb.com/LumeWeb/libkernel-universal.git",
         "@noble/hashes": "^1.2.0",
         "@siaweb/libweb": "git+https://git.lumeweb.com/LumeWeb/libsiaweb.git",
+        "b4a": "^1.6.3",
         "backoff.js": "^1.0.4",
         "eventemitter3": "^5.0.0"
     },
     "devDependencies": {
+        "@types/b4a": "^1.6.0",
         "@types/node": "^18.13.0",
         "prettier": "^2.8.4",
         "pretty": "^2.0.0",
