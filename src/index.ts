@@ -98,6 +98,10 @@ export class SwarmClient extends Client {
           this._sockets.delete(socketId);
         });
 
+        if (!this._sockets.has(socketId)) {
+          this._sockets.set(socketId, socket);
+        }
+
         this.emit("connection", socket);
       }
     );
