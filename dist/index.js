@@ -1,6 +1,7 @@
 import { Client, factory } from "@lumeweb/libkernel-universal";
 import { hexToBuf } from "@siaweb/libweb";
 import { blake2b } from "@noble/hashes/blake2b";
+import b4a from "b4a";
 // @ts-ignore
 import Backoff from "backoff.js";
 export class SwarmClient extends Client {
@@ -40,11 +41,13 @@ export class SwarmClient extends Client {
             const buf = hexToBuf(pubkey);
             pubkey = this.handleErrorOrReturn(buf);
         }
-        const resp = this.callModuleReturn("connect", {
-            pubkey,
-            swarm: this.swarm,
+        let existing = Array.from(this._sockets.values()).filter((socket) => {
+            return b4a.equals(socket.remotePublicKey, pubkey);
         });
-        return createSocket(resp.id);
+        if (existing.length) {
+            return existing[0];
+        }
+        throw new Error("not implemented");
     }
     async init() {
         return await this.callModuleReturn("init", { swarm: this.swarm });
