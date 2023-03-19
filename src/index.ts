@@ -15,6 +15,10 @@ export class SwarmClient extends Client {
   private _connectBackoff: any;
 
   private _ready?: Promise<void>;
+  private _connectionListener?: [
+    sendUpdate: DataFn,
+    response: Promise<ErrTuple>
+  ];
 
   private _topics: Set<Uint8Array> = new Set<Uint8Array>();
   private _sockets: Map<number, Socket> = new Map<number, Socket>();
@@ -87,26 +91,29 @@ export class SwarmClient extends Client {
   }
 
   private async _listen() {
-    const connect = this.connectModule(
-      "listenConnections",
-      { swarm: this.swarm },
-      async (socketId: any) => {
-        const socket =
-          this._sockets.get(socketId) ?? (await createSocket(socketId));
+    if (!this._connectionListener) {
+      this._connectionListener = this.connectModule(
+        "listenConnections",
+        { swarm: this.swarm },
+        async (socketId: any) => {
+          const socket =
+            this._sockets.get(socketId) ?? (await createSocket(socketId));
 
-        socket.on("close", () => {
-          this._sockets.delete(socketId);
-        });
+          socket.on("close", () => {
+            this._sockets.delete(socketId);
+          });
 
-        if (!this._sockets.has(socketId)) {
-          this._sockets.set(socketId, socket);
+          if (!this._sockets.has(socketId)) {
+            this._sockets.set(socketId, socket);
+          }
+
+          this.emit("connection", socket);
         }
+      );
+    }
 
-        this.emit("connection", socket);
-      }
-    );
-
-    await connect[1];
+    await this._connectionListener[1];
+    this._connectionListener = undefined;
     this.start();
   }
 
