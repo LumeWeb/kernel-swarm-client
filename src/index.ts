@@ -241,7 +241,7 @@ export class Socket extends Client {
   }
 }
 
-const MODULE = "_AXpXQ4czC7B0hcqXfbhGv5T5MFAFprS9KC2c39GYaj9hw";
+const MODULE = "_AXaAhoQvjUXiua5jXa-uPPwyOoV0JrRkKNBfKqWTCTf2A";
 
 export const createClient = factory<SwarmClient>(SwarmClient, MODULE);
 
