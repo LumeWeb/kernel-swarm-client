@@ -8,6 +8,9 @@ import type { EventEmitter } from "eventemitter3";
 
 // @ts-ignore
 import Backoff from "backoff.js";
+import { Mutex } from "async-mutex";
+// @ts-ignore
+import Protomux from "protomux";
 
 export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
@@ -67,9 +70,11 @@ export class SwarmClient extends Client {
 
     throw new Error("not implemented");
   }
+
   async init(): Promise<ErrTuple> {
     return await this.callModuleReturn("init", { swarm: this.swarm });
   }
+
   async ready(): Promise<void> {
     if (this._ready) {
       return this._ready;
@@ -132,6 +137,7 @@ export class SwarmClient extends Client {
   public async clearRelays(): Promise<void> {
     return this.callModuleReturn("clearRelays", { swarm: this.swarm });
   }
+
   public async getRelays(): Promise<string[]> {
     return this.callModuleReturn("getRelays", { swarm: this.swarm });
   }
@@ -156,6 +162,8 @@ export class Socket extends Client {
   private id: number;
   private eventUpdates: { [event: string]: DataFn[] } = {};
 
+  private syncMutex = new Mutex();
+
   constructor(id: number) {
     super();
     this.id = id;
@@ -178,6 +186,52 @@ export class Socket extends Client {
 
     this._remotePublicKey = info.remotePublicKey;
     this._rawStream = info.rawStream;
+
+    this._initSync();
+  }
+
+  private async _initSync() {
+    const mux = Protomux.from(this);
+
+    const [update] = this.connectModule(
+      "syncProtomux",
+      { id: this.id },
+      async (data: any) => {
+        await this.syncMutex.acquire();
+
+        ["remote", "local"].forEach((field) => {
+          const rField = `_${field}`;
+          data[field].forEach((item: any) => {
+            if (!mux[rField][item]) {
+              while (item > mux[rField].length) {
+                mux[rField].push(null);
+              }
+            }
+            if (!mux[rField][item]) {
+              mux[rField][item] = null;
+            }
+          });
+        });
+
+        data.free.forEach((index: number) => {
+          if (mux._free[index] === null) {
+            mux._free[index] = undefined;
+          }
+        });
+        mux._free = mux._free.filter((item: any) => item !== undefined);
+
+        this.syncMutex.release();
+      }
+    );
+
+    const send = (mux: any) => {
+      update({
+        remote: Object.keys(mux._remote),
+        local: Object.keys(mux._local),
+        free: mux._free,
+      });
+    };
+    mux.syncState = send.bind(undefined, mux);
   }
 
   on<T extends EventEmitter.EventNames<string | symbol>>(

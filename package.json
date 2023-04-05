@@ -7,9 +7,11 @@
         "@lumeweb/libkernel-universal": "git+https://git.lumeweb.com/LumeWeb/libkernel-universal.git",
         "@noble/hashes": "^1.2.0",
         "@siaweb/libweb": "git+https://git.lumeweb.com/LumeWeb/libsiaweb.git",
+        "async-mutex": "^0.4.0",
         "b4a": "^1.6.3",
         "backoff.js": "^1.0.4",
-        "eventemitter3": "^5.0.0"
+        "eventemitter3": "^5.0.0",
+        "protomux": "git+https://git.lumeweb.com/LumeWeb/protomux.git"
     },
     "devDependencies": {
         "@types/b4a": "^1.6.0",
