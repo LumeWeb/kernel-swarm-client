@@ -11,6 +11,7 @@
         "b4a": "^1.6.3",
         "backoff.js": "^1.0.4",
         "eventemitter3": "^5.0.0",
+        "p-defer": "^4.0.0",
         "protomux": "git+https://git.lumeweb.com/LumeWeb/protomux.git"
     },
     "devDependencies": {

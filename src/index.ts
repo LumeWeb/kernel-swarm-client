@@ -11,6 +11,7 @@ import Backoff from "backoff.js";
 import { Mutex } from "async-mutex";
 // @ts-ignore
 import Protomux from "protomux";
+import defer from "p-defer";
 
 export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
@@ -193,10 +194,18 @@ export class Socket extends Client {
   private async _initSync() {
     const mux = Protomux.from(this);
 
+    let updateDone = defer();
+
     const [update] = this.connectModule(
       "syncProtomux",
       { id: this.id },
       async (data: any) => {
+        if (data === true) {
+          updateDone.resolve();
+          updateDone = defer();
+          return;
+        }
+
         await this.syncMutex.acquire();
 
         ["remote", "local"].forEach((field) => {
@@ -219,17 +228,19 @@ export class Socket extends Client {
           }
         });
         mux._free = mux._free.filter((item: any) => item !== undefined);
+        update(true);
 
         this.syncMutex.release();
       }
     );
 
-    const send = (mux: any) => {
+    const send = async (mux: any) => {
       update({
         remote: Object.keys(mux._remote),
         local: Object.keys(mux._local),
         free: mux._free,
       });
+      await updateDone.promise;
     };
     mux.syncState = send.bind(undefined, mux);
   }
