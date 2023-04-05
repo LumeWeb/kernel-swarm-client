@@ -4,6 +4,9 @@ import { blake2b } from "@noble/hashes/blake2b";
 import b4a from "b4a";
 // @ts-ignore
 import Backoff from "backoff.js";
+import { Mutex } from "async-mutex";
+// @ts-ignore
+import Protomux from "protomux";
 export class SwarmClient extends Client {
     useDefaultSwarm;
     id = 0;
@@ -108,6 +111,7 @@ export class SwarmClient extends Client {
 export class Socket extends Client {
     id;
     eventUpdates = {};
+    syncMutex = new Mutex();
     constructor(id) {
         super();
         this.id = id;
@@ -124,6 +128,41 @@ export class Socket extends Client {
         let info = await this.callModuleReturn("socketGetInfo", { id: this.id });
         this._remotePublicKey = info.remotePublicKey;
         this._rawStream = info.rawStream;
+        this._initSync();
+    }
+    async _initSync() {
+        const mux = Protomux.from(this);
+        const [update] = this.connectModule("syncProtomux", { id: this.id }, async (data) => {
+            await this.syncMutex.acquire();
+            ["remote", "local"].forEach((field) => {
+                const rField = `_${field}`;
+                data[field].forEach((item) => {
+                    if (!mux[rField][item]) {
+                        while (item > mux[rField].length) {
+                            mux[rField].push(null);
+                        }
+                    }
+                    if (!mux[rField][item]) {
+                        mux[rField][item] = null;
+                    }
+                });
+            });
+            data.free.forEach((index) => {
+                if (mux._free[index] === null) {
+                    mux._free[index] = undefined;
+                }
+            });
+            mux._free = mux._free.filter((item) => item !== undefined);
+            this.syncMutex.release();
+        });
+        const send = (mux) => {
+            update({
+                remote: Object.keys(mux._remote),
+                local: Object.keys(mux._local),
+                free: mux._free,
+            });
+        };
+        mux.syncState = send.bind(undefined, mux);
     }
     on(event, fn, context) {
         const [update, promise] = this.connectModule("socketListenEvent", { id: this.id, event: event }, (data) => {
