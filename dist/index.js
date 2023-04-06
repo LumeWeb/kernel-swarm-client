@@ -137,7 +137,6 @@ export class Socket extends Client {
     async _initSync() {
         this.userData = null;
         const mux = Protomux.from(this);
-        this.swarm.emit("setup", this);
         let updateDone = defer();
         const setup = defer();
         const [update] = this.connectModule("syncProtomux", { id: this.id }, async (data) => {
@@ -179,7 +178,8 @@ export class Socket extends Client {
             await updateDone.promise;
         };
         mux.syncState = send.bind(undefined, mux);
-        return setup.promise;
+        await setup.promise;
+        this.swarm.emit("setup", this);
     }
     on(event, fn, context) {
         const [update, promise] = this.connectModule("socketListenEvent", { id: this.id, event: event }, (data) => {
