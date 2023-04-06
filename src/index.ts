@@ -107,7 +107,7 @@ export class SwarmClient extends Client {
         { swarm: this.swarm },
         async (socketId: any) => {
           const socket =
-            this._sockets.get(socketId) ?? (await createSocket(socketId));
+            this._sockets.get(socketId) ?? (await createSocket(socketId, this));
 
           socket.on("close", () => {
             this._sockets.delete(socketId);
