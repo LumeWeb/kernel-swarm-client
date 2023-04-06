@@ -202,6 +202,7 @@ export class Socket extends Client {
     this.swarm.emit("setup", this);
 
     let updateDone = defer();
+    const setup = defer();
 
     const [update] = this.connectModule(
       "syncProtomux",
@@ -238,6 +239,7 @@ export class Socket extends Client {
         update(true);
 
         this.syncMutex.release();
+        setup.resolve();
       }
     );
 
@@ -250,6 +252,7 @@ export class Socket extends Client {
       await updateDone.promise;
     };
     mux.syncState = send.bind(undefined, mux);
+    return setup.promise;
   }
 
   on<T extends EventEmitter.EventNames<string | symbol>>(
