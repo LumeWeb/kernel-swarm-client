@@ -32,7 +32,8 @@ export declare class Socket extends Client {
     private id;
     private eventUpdates;
     private syncMutex;
-    constructor(id: number);
+    private swarm;
+    constructor(id: number, swarm: SwarmClient);
     private _remotePublicKey?;
     get remotePublicKey(): Uint8Array;
     private _rawStream?;

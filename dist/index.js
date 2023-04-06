@@ -113,9 +113,11 @@ export class Socket extends Client {
     id;
     eventUpdates = {};
     syncMutex = new Mutex();
-    constructor(id) {
+    swarm;
+    constructor(id, swarm) {
         super();
         this.id = id;
+        this.swarm = swarm;
     }
     _remotePublicKey;
     get remotePublicKey() {
@@ -133,6 +135,7 @@ export class Socket extends Client {
     }
     async _initSync() {
         const mux = Protomux.from(this);
+        this.swarm.emit("setup", this);
         let updateDone = defer();
         const [update] = this.connectModule("syncProtomux", { id: this.id }, async (data) => {
             if (data === true) {
