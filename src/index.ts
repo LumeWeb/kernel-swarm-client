@@ -197,7 +197,7 @@ export class Socket extends Client {
 
   private async _initSync() {
     this.userData = null;
-    const mux = Protomux.from(this);
+    const mux = Protomux.from(this, { slave: true });
 
     let updateSent = defer();
     let updateReceived = defer();
