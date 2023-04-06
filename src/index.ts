@@ -199,7 +199,8 @@ export class Socket extends Client {
     this.userData = null;
     const mux = Protomux.from(this);
 
-    let updateDone = defer();
+    let updateSent = defer();
+    let updateReceived = defer();
     const setup = defer();
 
     const [update] = this.connectModule(
@@ -207,8 +208,8 @@ export class Socket extends Client {
       { id: this.id },
       async (data: any) => {
         if (data === true) {
-          updateDone.resolve();
-          updateDone = defer();
+          updateSent.resolve();
+          updateSent = defer();
           return;
         }
 
@@ -234,10 +235,10 @@ export class Socket extends Client {
           }
         });
         mux._free = mux._free.filter((item: any) => item !== undefined);
-        update(true);
 
         this.syncMutex.release();
         setup.resolve();
+        updateReceived.resolve();
       }
     );
 
@@ -247,7 +248,11 @@ export class Socket extends Client {
         local: Object.keys(mux._local),
         free: mux._free,
       });
-      await updateDone.promise;
+
+      updateReceived = defer();
+
+      await updateSent.promise;
+      await updateReceived.promise;
     };
     mux.syncState = send.bind(undefined, mux);
     await setup.promise;
