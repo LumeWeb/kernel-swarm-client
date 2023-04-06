@@ -199,8 +199,6 @@ export class Socket extends Client {
     this.userData = null;
     const mux = Protomux.from(this);
 
-    this.swarm.emit("setup", this);
-
     let updateDone = defer();
     const setup = defer();
 
@@ -252,7 +250,8 @@ export class Socket extends Client {
       await updateDone.promise;
     };
     mux.syncState = send.bind(undefined, mux);
-    return setup.promise;
+    await setup.promise;
+    this.swarm.emit("setup", this);
   }
 
   on<T extends EventEmitter.EventNames<string | symbol>>(
