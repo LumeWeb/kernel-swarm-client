@@ -166,6 +166,7 @@ export class Socket extends Client {
   private syncMutex = new Mutex();
 
   private swarm: SwarmClient;
+  private userData?: any = null;
 
   constructor(id: number, swarm: SwarmClient) {
     super();
@@ -195,6 +196,7 @@ export class Socket extends Client {
   }
 
   private async _initSync() {
+    this.userData = null;
     const mux = Protomux.from(this);
 
     this.swarm.emit("setup", this);
