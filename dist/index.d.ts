@@ -40,13 +40,13 @@ export declare class Socket extends Client {
     private _rawStream?;
     get rawStream(): Uint8Array;
     setup(): Promise<void>;
-    private _initSync;
     on<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn: EventEmitter.EventListener<string | symbol, T>, context?: any): this;
     off<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn?: EventEmitter.EventListener<string | symbol, T>, context?: any, once?: boolean): this;
     write(message: string | Buffer): void;
     end(): void;
     private ensureEvent;
     private trackEvent;
+    syncProtomux(action: string, id: number): Promise<any>;
 }
 export declare const createClient: (...args: any) => SwarmClient;
 //# sourceMappingURL=index.d.ts.map

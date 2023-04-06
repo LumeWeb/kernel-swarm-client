@@ -7,7 +7,6 @@ import Backoff from "backoff.js";
 import { Mutex } from "async-mutex";
 // @ts-ignore
 import Protomux from "protomux";
-import defer from "p-defer";
 export class SwarmClient extends Client {
     useDefaultSwarm;
     id = 0;
@@ -132,57 +131,7 @@ export class Socket extends Client {
         let info = await this.callModuleReturn("socketGetInfo", { id: this.id });
         this._remotePublicKey = info.remotePublicKey;
         this._rawStream = info.rawStream;
-        this._initSync();
-    }
-    async _initSync() {
-        this.userData = null;
-        const mux = Protomux.from(this, { slave: true });
-        let updateSent = defer();
-        let updateReceived = defer();
-        const setup = defer();
-        const [update] = this.connectModule("syncProtomux", { id: this.id }, async (data) => {
-            if (data === true) {
-                updateSent.resolve();
-                updateSent = defer();
-                return;
-            }
-            await this.syncMutex.acquire();
-            ["remote", "local"].forEach((field) => {
-                const rField = `_${field}`;
-                data[field].forEach((item) => {
-                    if (!mux[rField][item]) {
-                        while (item > mux[rField].length) {
-                            mux[rField].push(null);
-                        }
-                    }
-                    if (!mux[rField][item]) {
-                        mux[rField][item] = null;
-                    }
-                });
-            });
-            data.free.forEach((index) => {
-                if (mux._free[index] === null) {
-                    mux._free[index] = undefined;
-                }
-            });
-            mux._free = mux._free.filter((item) => item !== undefined);
-            this.syncMutex.release();
-            setup.resolve();
-            updateReceived.resolve();
-        });
-        const send = async (mux) => {
-            update({
-                remote: Object.keys(mux._remote),
-                local: Object.keys(mux._local),
-                free: mux._free,
-            });
-            updateReceived = defer();
-            await updateSent.promise;
-            await updateReceived.promise;
-        };
-        mux.syncState = send.bind(undefined, mux);
-        await setup.promise;
-        this.swarm.emit("setup", this);
+        Protomux.from(this, { slave: true });
     }
     on(event, fn, context) {
         const [update, promise] = this.connectModule("socketListenEvent", { id: this.id, event: event }, (data) => {
@@ -220,6 +169,9 @@ export class Socket extends Client {
     trackEvent(event, update) {
         this.ensureEvent(event);
         this.eventUpdates[event].push(update);
+    }
+    async syncProtomux(action, id) {
+        return this.callModuleReturn("syncProtomux", { action, data: id });
     }
 }
 const MODULE = "_AVKgzVYC8Sb_qiTA6kw5BDzQ4Ch-8D4sldQJl8dXF9oTw";
