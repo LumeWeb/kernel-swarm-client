@@ -137,12 +137,13 @@ export class Socket extends Client {
     async _initSync() {
         this.userData = null;
         const mux = Protomux.from(this);
-        let updateDone = defer();
+        let updateSent = defer();
+        let updateReceived = defer();
         const setup = defer();
         const [update] = this.connectModule("syncProtomux", { id: this.id }, async (data) => {
             if (data === true) {
-                updateDone.resolve();
-                updateDone = defer();
+                updateSent.resolve();
+                updateSent = defer();
                 return;
             }
             await this.syncMutex.acquire();
@@ -165,9 +166,9 @@ export class Socket extends Client {
                 }
             });
             mux._free = mux._free.filter((item) => item !== undefined);
-            update(true);
             this.syncMutex.release();
             setup.resolve();
+            updateReceived.resolve();
         });
         const send = async (mux) => {
             update({
@@ -175,7 +176,9 @@ export class Socket extends Client {
                 local: Object.keys(mux._local),
                 free: mux._free,
             });
-            await updateDone.promise;
+            updateReceived = defer();
+            await updateSent.promise;
+            await updateReceived.promise;
         };
         mux.syncState = send.bind(undefined, mux);
         await setup.promise;
