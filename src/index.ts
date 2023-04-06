@@ -192,73 +192,8 @@ export class Socket extends Client {
     this._remotePublicKey = info.remotePublicKey;
     this._rawStream = info.rawStream;
 
-    this._initSync();
+    Protomux.from(this, { slave: true });
   }
-
-  private async _initSync() {
-    this.userData = null;
-    const mux = Protomux.from(this, { slave: true });
-
-    let updateSent = defer();
-    let updateReceived = defer();
-    const setup = defer();
-
-    const [update] = this.connectModule(
-      "syncProtomux",
-      { id: this.id },
-      async (data: any) => {
-        if (data === true) {
-          updateSent.resolve();
-          updateSent = defer();
-          return;
-        }
-
-        await this.syncMutex.acquire();
-
-        ["remote", "local"].forEach((field) => {
-          const rField = `_${field}`;
-          data[field].forEach((item: any) => {
-            if (!mux[rField][item]) {
-              while (item > mux[rField].length) {
-                mux[rField].push(null);
-              }
-            }
-            if (!mux[rField][item]) {
-              mux[rField][item] = null;
-            }
-          });
-        });
-
-        data.free.forEach((index: number) => {
-          if (mux._free[index] === null) {
-            mux._free[index] = undefined;
-          }
-        });
-        mux._free = mux._free.filter((item: any) => item !== undefined);
-
-        this.syncMutex.release();
-        setup.resolve();
-        updateReceived.resolve();
-      }
-    );
-
-    const send = async (mux: any) => {
-      update({
-        remote: Object.keys(mux._remote),
-        local: Object.keys(mux._local),
-        free: mux._free,
-      });
-
-      updateReceived = defer();
-
-      await updateSent.promise;
-      await updateReceived.promise;
-    };
-    mux.syncState = send.bind(undefined, mux);
-    await setup.promise;
-    this.swarm.emit("setup", this);
-  }
-
   on<T extends EventEmitter.EventNames<string | symbol>>(
     event: T,
     fn: EventEmitter.EventListener<string | symbol, T>,
@@ -317,6 +252,10 @@ export class Socket extends Client {
   private trackEvent(event: string, update: DataFn): void {
     this.ensureEvent(event as string);
     this.eventUpdates[event].push(update);
+  }
+
+  public async syncProtomux(action: string, id: number) {
+    return this.callModuleReturn("syncProtomux", { action, data: id });
   }
 }
 
