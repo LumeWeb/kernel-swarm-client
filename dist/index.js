@@ -114,6 +114,7 @@ export class Socket extends Client {
     eventUpdates = {};
     syncMutex = new Mutex();
     swarm;
+    userData = null;
     constructor(id, swarm) {
         super();
         this.id = id;
@@ -134,6 +135,7 @@ export class Socket extends Client {
         this._initSync();
     }
     async _initSync() {
+        this.userData = null;
         const mux = Protomux.from(this);
         this.swarm.emit("setup", this);
         let updateDone = defer();
