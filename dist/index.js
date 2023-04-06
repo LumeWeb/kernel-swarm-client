@@ -171,7 +171,11 @@ export class Socket extends Client {
         this.eventUpdates[event].push(update);
     }
     async syncProtomux(action, id) {
-        return this.callModuleReturn("syncProtomux", { action, data: id });
+        return this.callModuleReturn("syncProtomux", {
+            id: this.id,
+            action,
+            data: id,
+        });
     }
 }
 const MODULE = "_AVKgzVYC8Sb_qiTA6kw5BDzQ4Ch-8D4sldQJl8dXF9oTw";
