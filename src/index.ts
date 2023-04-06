@@ -165,9 +165,12 @@ export class Socket extends Client {
 
   private syncMutex = new Mutex();
 
-  constructor(id: number) {
+  private swarm: SwarmClient;
+
+  constructor(id: number, swarm: SwarmClient) {
     super();
     this.id = id;
+    this.swarm = swarm;
   }
 
   private _remotePublicKey?: Uint8Array;
@@ -193,6 +196,8 @@ export class Socket extends Client {
 
   private async _initSync() {
     const mux = Protomux.from(this);
+
+    this.swarm.emit("setup", this);
 
     let updateDone = defer();
 
