@@ -255,7 +255,11 @@ export class Socket extends Client {
   }
 
   public async syncProtomux(action: string, id: number) {
-    return this.callModuleReturn("syncProtomux", { action, data: id });
+    return this.callModuleReturn("syncProtomux", {
+      id: this.id,
+      action,
+      data: id,
+    });
   }
 }
 
