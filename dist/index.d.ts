@@ -48,5 +48,6 @@ export declare class Socket extends Client {
     private trackEvent;
     syncProtomux(action: string, id: number): Promise<any>;
 }
+export declare const MODULE = "_AVKgzVYC8Sb_qiTA6kw5BDzQ4Ch-8D4sldQJl8dXF9oTw";
 export declare const createClient: (...args: any) => SwarmClient;
 //# sourceMappingURL=index.d.ts.map
