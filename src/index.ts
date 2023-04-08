@@ -191,8 +191,6 @@ export class Socket extends Client {
 
     this._remotePublicKey = info.remotePublicKey;
     this._rawStream = info.rawStream;
-
-    Protomux.from(this, { slave: true });
   }
   on<T extends EventEmitter.EventNames<string | symbol>>(
     event: T,
