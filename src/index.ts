@@ -253,14 +253,6 @@ export class Socket extends Client {
     this.ensureEvent(event as string);
     this.eventUpdates[event].push(update);
   }
-
-  public async syncProtomux(action: string, id: number) {
-    return this.callModuleReturn("syncProtomux", {
-      id: this.id,
-      action,
-      data: id,
-    });
-  }
 }
 
 export const MODULE = "_AVKgzVYC8Sb_qiTA6kw5BDzQ4Ch-8D4sldQJl8dXF9oTw";
