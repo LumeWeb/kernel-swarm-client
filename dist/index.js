@@ -5,8 +5,6 @@ import b4a from "b4a";
 // @ts-ignore
 import Backoff from "backoff.js";
 import { Mutex } from "async-mutex";
-// @ts-ignore
-import Protomux from "protomux";
 export class SwarmClient extends Client {
     useDefaultSwarm;
     id = 0;
@@ -131,25 +129,25 @@ export class Socket extends Client {
         let info = await this.callModuleReturn("socketGetInfo", { id: this.id });
         this._remotePublicKey = info.remotePublicKey;
         this._rawStream = info.rawStream;
-        Protomux.from(this, { slave: true });
+        await this.swarm.emitAsync("setup", this);
     }
-    on(event, fn, context) {
+    on(event, listener, options) {
         const [update, promise] = this.connectModule("socketListenEvent", { id: this.id, event: event }, (data) => {
             this.emit(event, data);
         });
         this.trackEvent(event, update);
         promise.then(() => {
-            this.off(event, fn);
+            this.off(event, listener);
         });
-        return super.on(event, fn, context);
+        return super.on(event, listener, options);
     }
-    off(event, fn, context, once) {
+    off(event, listener) {
         const updates = [...this.eventUpdates[event]];
         this.eventUpdates[event] = [];
         for (const func of updates) {
             func();
         }
-        return super.off(event, fn, context, once);
+        return super.off(event, listener);
     }
     write(message) {
         this.callModule("socketWrite", { id: this.id, message });
@@ -169,13 +167,6 @@ export class Socket extends Client {
     trackEvent(event, update) {
         this.ensureEvent(event);
         this.eventUpdates[event].push(update);
-    }
-    async syncProtomux(action, id) {
-        return this.callModuleReturn("syncProtomux", {
-            id: this.id,
-            action,
-            data: id,
-        });
     }
 }
 export const MODULE = "_AVKgzVYC8Sb_qiTA6kw5BDzQ4Ch-8D4sldQJl8dXF9oTw";

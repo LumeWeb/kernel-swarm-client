@@ -2,7 +2,7 @@
 import { Buffer } from "buffer";
 import { Client } from "@lumeweb/libkernel-universal";
 import { ErrTuple } from "@siaweb/libweb";
-import type { EventEmitter } from "eventemitter3";
+import type { eventNS, event, ListenerFn, OnOptions, Listener } from "eventemitter2";
 export declare class SwarmClient extends Client {
     private useDefaultSwarm;
     private id;
@@ -40,13 +40,12 @@ export declare class Socket extends Client {
     private _rawStream?;
     get rawStream(): Uint8Array;
     setup(): Promise<void>;
-    on<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn: EventEmitter.EventListener<string | symbol, T>, context?: any): this;
-    off<T extends EventEmitter.EventNames<string | symbol>>(event: T, fn?: EventEmitter.EventListener<string | symbol, T>, context?: any, once?: boolean): this;
+    on(event: event | eventNS, listener: ListenerFn, options?: boolean | OnOptions): this | Listener;
+    off(event: event | eventNS, listener: ListenerFn): this;
     write(message: string | Buffer): void;
     end(): void;
     private ensureEvent;
     private trackEvent;
-    syncProtomux(action: string, id: number): Promise<any>;
 }
 export declare const MODULE = "_AVKgzVYC8Sb_qiTA6kw5BDzQ4Ch-8D4sldQJl8dXF9oTw";
 export declare const createClient: (...args: any) => SwarmClient;
