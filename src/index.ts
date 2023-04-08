@@ -191,7 +191,7 @@ export class Socket extends Client {
 
     this._remotePublicKey = info.remotePublicKey;
     this._rawStream = info.rawStream;
-    await this.swarm.emitAsync("setup");
+    await this.swarm.emitAsync("setup", this);
   }
   on<T extends EventEmitter.EventNames<string | symbol>>(
     event: T,
