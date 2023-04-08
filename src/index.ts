@@ -4,14 +4,19 @@ import { DataFn, ErrTuple, hexToBuf } from "@siaweb/libweb";
 import { blake2b } from "@noble/hashes/blake2b";
 import b4a from "b4a";
 
-import type { EventEmitter } from "eventemitter3";
-
 // @ts-ignore
 import Backoff from "backoff.js";
 import { Mutex } from "async-mutex";
 // @ts-ignore
 import Protomux from "protomux";
-import defer from "p-defer";
+
+import type {
+  eventNS,
+  event,
+  ListenerFn,
+  OnOptions,
+  Listener,
+} from "eventemitter2";
 
 export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
@@ -193,11 +198,12 @@ export class Socket extends Client {
     this._rawStream = info.rawStream;
     await this.swarm.emitAsync("setup", this);
   }
-  on<T extends EventEmitter.EventNames<string | symbol>>(
-    event: T,
-    fn: EventEmitter.EventListener<string | symbol, T>,
-    context?: any
-  ): this {
+
+  on(
+    event: event | eventNS,
+    listener: ListenerFn,
+    options?: boolean | OnOptions
+  ): this | Listener {
     const [update, promise] = this.connectModule(
       "socketListenEvent",
       { id: this.id, event: event },
@@ -208,24 +214,19 @@ export class Socket extends Client {
     this.trackEvent(event as string, update);
 
     promise.then(() => {
-      this.off(event as string, fn);
+      this.off(event as string, listener);
     });
 
-    return super.on(event, fn, context) as this;
+    return super.on(event, listener, options);
   }
 
-  off<T extends EventEmitter.EventNames<string | symbol>>(
-    event: T,
-    fn?: EventEmitter.EventListener<string | symbol, T>,
-    context?: any,
-    once?: boolean
-  ): this {
+  off(event: event | eventNS, listener: ListenerFn): this {
     const updates = [...this.eventUpdates[event as string]];
     this.eventUpdates[event as string] = [];
     for (const func of updates) {
       func();
     }
-    return super.off(event, fn, context, once);
+    return super.off(event, listener);
   }
 
   write(message: string | Buffer): void {
