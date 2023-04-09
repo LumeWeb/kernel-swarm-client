@@ -169,7 +169,7 @@ export class Socket extends Client {
         this.eventUpdates[event].push(update);
     }
 }
-export const MODULE = "_AV0jHIhooJYvu8a9_9os4aTHQP-QlDymCtvbFCuPcpetw";
+export const MODULE = "_AXrQLca2khpy2m0bhEqpD3xsK6xlvekjq-bmhBrzoc4yg";
 export const createClient = factory(SwarmClient, MODULE);
 const socketFactory = factory(Socket, MODULE);
 const createSocket = async (...args) => {
