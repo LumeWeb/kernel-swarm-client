@@ -47,6 +47,6 @@ export declare class Socket extends Client {
     private ensureEvent;
     private trackEvent;
 }
-export declare const MODULE = "_AVKgzVYC8Sb_qiTA6kw5BDzQ4Ch-8D4sldQJl8dXF9oTw";
+export declare const MODULE = "_AV0jHIhooJYvu8a9_9os4aTHQP-QlDymCtvbFCuPcpetw";
 export declare const createClient: (...args: any) => SwarmClient;
 //# sourceMappingURL=index.d.ts.map
