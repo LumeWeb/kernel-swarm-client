@@ -1,6 +1,6 @@
 {
     "name": "@lumeweb/kernel-swarm-client",
-    "version": "0.1.0",
+    "version": "0.0.2-develop.1",
     "type": "module",
     "main": "lib/index.js",
     "repository": {
@@ -13,7 +13,6 @@
         "presetter": "*"
     },
     "readme": "ERROR: No README data found!",
-    "_id": "@lumeweb/kernel-swarm-client@0.1.0",
     "scripts": {
         "prepare": "presetter bootstrap",
         "build": "run build",
