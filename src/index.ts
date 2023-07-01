@@ -1,6 +1,6 @@
 import { Buffer } from "buffer";
-import { Client, factory } from "@lumeweb/libkernel-universal";
-import { DataFn, ErrTuple, hexToBuf } from "@siaweb/libweb";
+import { Client, factory } from "@lumeweb/libkernel/module";
+import { DataFn, ErrTuple, hexToBuf, logErr } from "@lumeweb/libkernel";
 import { blake2b } from "@noble/hashes/blake2b";
 import b4a from "b4a";
 
@@ -27,7 +27,7 @@ export class SwarmClient extends Client {
   private _ready?: Promise<void>;
   private _connectionListener?: [
     sendUpdate: DataFn,
-    response: Promise<ErrTuple>
+    response: Promise<ErrTuple>,
   ];
 
   private _topics: Set<Uint8Array> = new Set<Uint8Array>();
@@ -42,8 +42,8 @@ export class SwarmClient extends Client {
     };
   }
 
-  constructor(useDefaultDht = true, autoReconnect = false) {
-    super();
+  constructor(module: string, useDefaultDht = true, autoReconnect = false) {
+    super(module);
     this.useDefaultSwarm = useDefaultDht;
     this._autoReconnect = autoReconnect;
     this._connectBackoff = new Backoff({
@@ -52,7 +52,7 @@ export class SwarmClient extends Client {
     });
 
     this._connectBackoff.on("retry", (error: any) => {
-      this.logErr(error);
+      logErr(error);
     });
   }
 
@@ -123,7 +123,7 @@ export class SwarmClient extends Client {
           }
 
           this.emit("connection", socket);
-        }
+        },
       );
     }
 
@@ -173,8 +173,8 @@ export class Socket extends Client {
   private swarm: SwarmClient;
   private userData?: any = null;
 
-  constructor(id: number, swarm: SwarmClient) {
-    super();
+  constructor(module: string, id: number, swarm: SwarmClient) {
+    super(module);
     this.id = id;
     this.swarm = swarm;
   }
@@ -202,14 +202,14 @@ export class Socket extends Client {
   on(
     event: event | eventNS,
     listener: ListenerFn,
-    options?: boolean | OnOptions
+    options?: boolean | OnOptions,
   ): this | Listener {
     const [update, promise] = this.connectModule(
       "socketListenEvent",
       { id: this.id, event: event },
       (data: any) => {
         this.emit(event, data);
-      }
+      },
     );
     this.trackEvent(event as string, update);
 
@@ -239,7 +239,7 @@ export class Socket extends Client {
         if (exists) {
           this.callModule("socketClose", { id: this.id });
         }
-      }
+      },
     );
   }
 
@@ -255,7 +255,8 @@ export class Socket extends Client {
   }
 }
 
-export const MODULE = "_AU-CzTIzrnnJSoVjfWG_d3cAb8_hONuZ1XaqbFlygrFlg";
+export const MODULE =
+  "zduSB7gEXpcHo4F1esrpHRaB9nYh6KtTn3bktnpJRxWnpvqPhaLNmPwAp7";
 
 export const createClient = factory<SwarmClient>(SwarmClient, MODULE);
 
