@@ -8,7 +8,7 @@
             "name": "@lumeweb/kernel-swarm-client",
             "version": "0.1.0",
             "dependencies": {
-                "@lumeweb/libkernel": "^0.1.0-develop.8",
+                "@lumeweb/libkernel": "^0.1.0-develop.9",
                 "async-mutex": "^0.4.0",
                 "b4a": "^1.6.4"
             },
@@ -1681,12 +1681,23 @@
             }
         },
         "node_modules/@lumeweb/libkernel": {
-            "version": "0.1.0-develop.8",
-            "resolved": "https://registry.npmjs.org/@lumeweb/libkernel/-/libkernel-0.1.0-develop.8.tgz",
-            "integrity": "sha512-n7LM4+zCSLBDtVLmYi75rRHu+Fqd7G5AsOZUKCJwAoglnT6YiWR49FSNBRt3VmY2wpfdK7P/WwSknGQfAzc/uQ==",
+            "version": "0.1.0-develop.9",
+            "resolved": "https://registry.npmjs.org/@lumeweb/libkernel/-/libkernel-0.1.0-develop.9.tgz",
+            "integrity": "sha512-izusLjMFaMpsIT4PnnxRQgRM+bKiflaUIB37C82GvfDi7peMeuI2SIK7RW+LdcUOApQA5rXcr0DE6Cj0+FnQZQ==",
             "dependencies": {
                 "@lumeweb/libweb": "0.2.0-develop.20",
-                "eventemitter2": "^6.4.9"
+                "emittery": "^1.0.1"
+            }
+        },
+        "node_modules/@lumeweb/libkernel/node_modules/emittery": {
+            "version": "1.0.1",
+            "resolved": "https://registry.npmjs.org/emittery/-/emittery-1.0.1.tgz",
+            "integrity": "sha512-2ID6FdrMD9KDLldGesP6317G78K7km/kMcwItRtVFva7I/cSEOIaLpewaUb+YLXVwdAp3Ctfxh/V5zIl1sj7dQ==",
+            "engines": {
+                "node": ">=14.16"
+            },
+            "funding": {
+                "url": "https://github.com/sindresorhus/emittery?sponsor=1"
             }
         },
         "node_modules/@lumeweb/libportal": {
@@ -6378,11 +6389,6 @@
             "engines": {
                 "node": ">=6"
             }
-        },
-        "node_modules/eventemitter2": {
-            "version": "6.4.9",
-            "resolved": "https://registry.npmjs.org/eventemitter2/-/eventemitter2-6.4.9.tgz",
-            "integrity": "sha512-JEPTiaOt9f04oa6NOkc4aH+nVp5I3wEjpHbIPqfgCdD5v5bUzy7xQqwcVO2aDQgOWhI28da57HksMrzK9HlRxg=="
         },
         "node_modules/eventemitter3": {
             "version": "5.0.1",

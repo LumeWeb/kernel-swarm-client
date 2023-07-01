@@ -9,14 +9,7 @@ import Backoff from "backoff.js";
 import { Mutex } from "async-mutex";
 // @ts-ignore
 import Protomux from "protomux";
-
-import type {
-  eventNS,
-  event,
-  ListenerFn,
-  OnOptions,
-  Listener,
-} from "eventemitter2";
+import type { UnsubscribeFn } from "emittery";
 
 export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
@@ -196,14 +189,10 @@ export class Socket extends Client {
 
     this._remotePublicKey = info.remotePublicKey;
     this._rawStream = info.rawStream;
-    await this.swarm.emitAsync("setup", this);
+    await this.swarm.emit("setup", this);
   }
 
-  on(
-    event: event | eventNS,
-    listener: ListenerFn,
-    options?: boolean | OnOptions,
-  ): this | Listener {
+  on(event: any, listener: any): UnsubscribeFn {
     const [update, promise] = this.connectModule(
       "socketListenEvent",
       { id: this.id, event: event },
@@ -217,16 +206,17 @@ export class Socket extends Client {
       this.off(event as string, listener);
     });
 
-    return super.on(event, listener, options);
+    return super.on(event, listener);
   }
 
-  off(event: event | eventNS, listener: ListenerFn): this {
+  off(event: any, listener: any): this {
     const updates = [...this.eventUpdates[event as string]];
     this.eventUpdates[event as string] = [];
     for (const func of updates) {
       func();
     }
-    return super.off(event, listener);
+    super.off(event, listener);
+    return this;
   }
 
   write(message: string | Buffer): void {

@@ -20,7 +20,7 @@
         "semantic-release": "semantic-release"
     },
     "dependencies": {
-        "@lumeweb/libkernel": "^0.1.0-develop.8",
+        "@lumeweb/libkernel": "^0.1.0-develop.9",
         "async-mutex": "^0.4.0",
         "b4a": "^1.6.4"
     },
