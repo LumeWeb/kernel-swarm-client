@@ -10,7 +10,8 @@
             "dependencies": {
                 "@lumeweb/libkernel": "^0.1.0-develop.9",
                 "async-mutex": "^0.4.0",
-                "b4a": "^1.6.4"
+                "b4a": "^1.6.4",
+                "backoff.js": "^1.0.4"
             },
             "devDependencies": {
                 "@lumeweb/node-library-preset": "^0.2.7",
@@ -3765,6 +3766,11 @@
             "peerDependencies": {
                 "@babel/core": "^7.0.0"
             }
+        },
+        "node_modules/backoff.js": {
+            "version": "1.0.4",
+            "resolved": "https://registry.npmjs.org/backoff.js/-/backoff.js-1.0.4.tgz",
+            "integrity": "sha512-DSihmB0IK9dGOyd6ml1jzV6kINfZnupPHmo7mYXX1yxTn3Z/hCNdQeqrFUBPmxYQIN52ecy2E/uP0gEAEyVvIA=="
         },
         "node_modules/balanced-match": {
             "version": "1.0.2",
