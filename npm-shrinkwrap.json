@@ -1,12 +1,12 @@
 {
     "name": "@lumeweb/kernel-swarm-client",
-    "version": "0.0.2-develop.7",
+    "version": "0.0.2-develop.8",
     "lockfileVersion": 3,
     "requires": true,
     "packages": {
         "": {
             "name": "@lumeweb/kernel-swarm-client",
-            "version": "0.0.2-develop.7",
+            "version": "0.0.2-develop.8",
             "dependencies": {
                 "@lumeweb/libkernel": "^0.1.0-develop.9",
                 "async-mutex": "^0.4.0",
