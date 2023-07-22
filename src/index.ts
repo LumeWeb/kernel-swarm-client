@@ -6,7 +6,6 @@ import b4a from "b4a";
 
 // @ts-ignore
 import Backoff from "backoff.js";
-import { Mutex } from "async-mutex";
 // @ts-ignore
 import Protomux from "protomux";
 import type { UnsubscribeFn } from "emittery";
@@ -160,8 +159,6 @@ interface SocketRawStream {
 export class Socket extends Client {
   private id: number;
   private eventUpdates: { [event: string]: DataFn[] } = {};
-
-  private syncMutex = new Mutex();
 
   private swarm: SwarmClient;
   private userData?: any = null;
