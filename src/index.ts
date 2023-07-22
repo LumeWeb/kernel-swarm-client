@@ -229,15 +229,24 @@ export class Socket extends Client {
   }
 
   write(message: string | Buffer): void {
+    this.callModule("socketExists", { id: this.id }).then(
+      ([exists]: ErrTuple) => {
+        if (!exists) {
+          logErr("tried to write to closed socket");
+        }
+        this.callModule("socketWrite", { id: this.id, message });
+      },
+    );
     this.callModule("socketWrite", { id: this.id, message });
   }
 
   end(): void {
     this.callModule("socketExists", { id: this.id }).then(
       ([exists]: ErrTuple) => {
-        if (exists) {
-          this.callModule("socketClose", { id: this.id });
+        if (!exists) {
+          logErr("tried to close a closed socket");
         }
+        this.callModule("socketClose", { id: this.id });
       },
     );
   }
