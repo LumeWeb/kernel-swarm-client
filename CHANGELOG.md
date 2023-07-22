@@ -1,3 +1,10 @@
+## [0.0.2-develop.14](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.13...v0.0.2-develop.14) (2023-07-22)
+
+
+### Bug Fixes
+
+* missing return ([8380254](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/commit/8380254638dde806ce38d3406ea6b4127cb2444b))
+
 ## [0.0.2-develop.13](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.12...v0.0.2-develop.13) (2023-07-22)
 
 
