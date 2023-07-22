@@ -1,3 +1,11 @@
+## [0.0.2-develop.12](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.11...v0.0.2-develop.12) (2023-07-22)
+
+
+### Bug Fixes
+
+* change on to always return an instance of emittery unsubscribe function ([0c18c92](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/commit/0c18c92521de8b8685882b88ad8efa74a76617c6))
+* return type required ([7eabf6a](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/commit/7eabf6a05da9dcd833b55f386896a70fa6ec736d))
+
 ## [0.0.2-develop.11](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.10...v0.0.2-develop.11) (2023-07-22)
 
 ## [0.0.2-develop.10](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.9...v0.0.2-develop.10) (2023-07-22)
