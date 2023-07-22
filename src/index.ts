@@ -233,6 +233,7 @@ export class Socket extends Client {
       ([exists]: ErrTuple) => {
         if (!exists) {
           logErr("tried to write to closed socket");
+          return;
         }
         this.callModule("socketWrite", { id: this.id, message });
       },
@@ -245,6 +246,7 @@ export class Socket extends Client {
       ([exists]: ErrTuple) => {
         if (!exists) {
           logErr("tried to close a closed socket");
+          return;
         }
         this.callModule("socketClose", { id: this.id });
       },
