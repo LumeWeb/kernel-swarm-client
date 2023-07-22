@@ -8,6 +8,7 @@ import b4a from "b4a";
 import Backoff from "backoff.js";
 // @ts-ignore
 import Protomux from "protomux";
+import { UnsubscribeFn } from "emittery";
 
 export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
@@ -188,7 +189,7 @@ export class Socket extends Client {
     await this.swarm.emit("setup", this);
   }
 
-  on(event: any, listener: any) {
+  on(event: any, listener: any): UnsubscribeFn {
     const parentOn = super.on(event, listener);
     if (this.eventUpdates[event]?.has(listener)) {
       return parentOn;
