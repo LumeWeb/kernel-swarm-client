@@ -188,10 +188,10 @@ export class Socket extends Client {
     await this.swarm.emit("setup", this);
   }
 
-  // @ts-ignore
-  on(event: any, listener: any): this {
+  on(event: any, listener: any) {
+    const parentOn = super.on(event, listener);
     if (this.eventUpdates[event]?.has(listener)) {
-      return this;
+      return parentOn;
     }
 
     const [update, promise] = this.connectModule(
@@ -207,8 +207,7 @@ export class Socket extends Client {
       this.off(event as string, listener);
     });
 
-    super.on(event, listener);
-    return this;
+    return parentOn;
   }
 
   off(event: any, listener: any): this {
