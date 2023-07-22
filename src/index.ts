@@ -266,7 +266,7 @@ export class Socket extends Client {
 }
 
 export const MODULE =
-  "zduN1xKFUkDrPtUdvL9Sih7A6mAcnkhR6JuLtStf3zgCcpEsPyqkmbcoHH";
+  "zduNSYinQrrjB2s7Y57ABL7BCic5gD64p9rhrdvfoN4i5rQE2C9U3Q7jSF";
 
 export const createClient = factory<SwarmClient>(SwarmClient, MODULE);
 
