@@ -253,6 +253,10 @@ export class Socket extends Client {
     );
   }
 
+  async getListeners() {
+    return this.callModuleReturn("socketListeners", { id: this.id });
+  }
+
   private ensureEvent(event: string): void {
     if (!(event in this.eventUpdates)) {
       this.eventUpdates[event] = new Map<Function, DataFn>();
