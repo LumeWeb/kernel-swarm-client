@@ -1,3 +1,10 @@
+## [0.0.2-develop.13](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.12...v0.0.2-develop.13) (2023-07-22)
+
+
+### Bug Fixes
+
+* on write and end, log errors if we are trying to use a closed socket ([57efedd](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/commit/57efedd0affd5e647db185aff0ba1be2a137aef3))
+
 ## [0.0.2-develop.12](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.11...v0.0.2-develop.12) (2023-07-22)
 
 
