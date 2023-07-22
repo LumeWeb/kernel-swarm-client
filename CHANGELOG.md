@@ -1,3 +1,10 @@
+# [0.1.0-develop.1](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.14...v0.1.0-develop.1) (2023-07-22)
+
+
+### Features
+
+* add getListeners method to Socket ([0ec1dd1](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/commit/0ec1dd1aacdce1e85d6250db9b61a3edccfaafa7))
+
 ## [0.0.2-develop.14](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.13...v0.0.2-develop.14) (2023-07-22)
 
 
