@@ -8,7 +8,6 @@ import b4a from "b4a";
 import Backoff from "backoff.js";
 // @ts-ignore
 import Protomux from "protomux";
-import type { UnsubscribeFn } from "emittery";
 
 export class SwarmClient extends Client {
   private useDefaultSwarm: boolean;
@@ -158,7 +157,7 @@ interface SocketRawStream {
 
 export class Socket extends Client {
   private id: number;
-  private eventUpdates: { [event: string]: DataFn[] } = {};
+  private eventUpdates: { [event: string]: Map<Function, DataFn> } = {};
 
   private swarm: SwarmClient;
   private userData?: any = null;
@@ -189,7 +188,12 @@ export class Socket extends Client {
     await this.swarm.emit("setup", this);
   }
 
-  on(event: any, listener: any): UnsubscribeFn {
+  // @ts-ignore
+  on(event: any, listener: any): this {
+    if (this.eventUpdates[event]?.has(listener)) {
+      return this;
+    }
+
     const [update, promise] = this.connectModule(
       "socketListenEvent",
       { id: this.id, event: event },
@@ -197,22 +201,30 @@ export class Socket extends Client {
         this.emit(event, data);
       },
     );
-    this.trackEvent(event as string, update);
+    this.trackEvent(event as string, listener, update);
 
     promise.then(() => {
       this.off(event as string, listener);
     });
 
-    return super.on(event, listener);
+    super.on(event, listener);
+    return this;
   }
 
   off(event: any, listener: any): this {
-    const updates = [...this.eventUpdates[event as string]];
-    this.eventUpdates[event as string] = [];
-    for (const func of updates) {
-      func();
+    if (listener) {
+      const updates = this.eventUpdates[event];
+      updates?.get(listener)?.();
+      updates?.delete(listener);
+
+      return this;
     }
+
+    const updates = [...this.eventUpdates[event as string].values()];
+    this.eventUpdates[event as string] = new Map<Function, DataFn>();
+    updates.forEach((update) => update());
     super.off(event, listener);
+
     return this;
   }
 
@@ -232,13 +244,13 @@ export class Socket extends Client {
 
   private ensureEvent(event: string): void {
     if (!(event in this.eventUpdates)) {
-      this.eventUpdates[event] = [];
+      this.eventUpdates[event] = new Map<Function, DataFn>();
     }
   }
 
-  private trackEvent(event: string, update: DataFn): void {
+  private trackEvent(event: string, listener: Function, update: DataFn): void {
     this.ensureEvent(event as string);
-    this.eventUpdates[event].push(update);
+    this.eventUpdates[event].set(listener, update);
   }
 }
 
@@ -247,6 +259,7 @@ export const MODULE =
 
 export const createClient = factory<SwarmClient>(SwarmClient, MODULE);
 
+// @ts-ignore
 const socketFactory = factory<Socket>(Socket, MODULE);
 const createSocket = async (...args: any): Promise<Socket> => {
   const socket = socketFactory(...args);
