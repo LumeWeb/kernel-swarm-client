@@ -257,6 +257,13 @@ export class Socket extends Client {
     return this.callModuleReturn("socketListeners", { id: this.id });
   }
 
+  public setKeepAlive(ms: number) {
+    this.callModuleReturn("socketSetKeepAlive", {
+      id: this.id,
+      alive: ms,
+    });
+  }
+
   private ensureEvent(event: string): void {
     if (!(event in this.eventUpdates)) {
       this.eventUpdates[event] = new Map<Function, DataFn>();
