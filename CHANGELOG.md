@@ -1,3 +1,5 @@
+# [0.1.0-develop.2](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.1.0-develop.1...v0.1.0-develop.2) (2023-07-23)
+
 # [0.1.0-develop.1](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.14...v0.1.0-develop.1) (2023-07-22)
 
 
