@@ -1,3 +1,10 @@
+# [0.1.0-develop.3](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.1.0-develop.2...v0.1.0-develop.3) (2023-07-23)
+
+
+### Features
+
+* add setKeepAlive method ([19dceed](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/commit/19dceedab299c1cd35563c5c88a3f608cfc56deb))
+
 # [0.1.0-develop.2](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.1.0-develop.1...v0.1.0-develop.2) (2023-07-23)
 
 # [0.1.0-develop.1](https://git.lumeweb.com/LumeWeb/kernel-swarm-client/compare/v0.0.2-develop.14...v0.1.0-develop.1) (2023-07-22)
