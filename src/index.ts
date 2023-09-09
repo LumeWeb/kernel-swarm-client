@@ -1,6 +1,7 @@
 import { Buffer } from "buffer";
 import { Client, factory } from "@lumeweb/libkernel/module";
-import { DataFn, ErrTuple, hexToBuf, logErr } from "@lumeweb/libkernel";
+import { DataFn, ErrTuple, logErr } from "@lumeweb/libkernel";
+import { hexToBytes } from "@lumeweb/libweb";
 import { blake2b } from "@noble/hashes/blake2b";
 import b4a from "b4a";
 
@@ -54,8 +55,7 @@ export class SwarmClient extends Client {
 
   public async connect(pubkey: string | Uint8Array): Promise<Socket> {
     if (typeof pubkey === "string") {
-      const buf = hexToBuf(pubkey);
-      pubkey = this.handleErrorOrReturn(buf);
+      pubkey = hexToBytes(pubkey);
     }
 
     let existing = Array.from(this._sockets.values()).filter((socket) => {
