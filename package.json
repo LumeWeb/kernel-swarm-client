@@ -1,6 +1,6 @@
 {
     "name": "@lumeweb/kernel-swarm-client",
-    "version": "0.1.0-develop.10",
+    "version": "0.1.0-develop.11",
     "type": "module",
     "main": "lib/index.js",
     "repository": {
